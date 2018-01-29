@@ -32,7 +32,7 @@ type room struct {
 
 func newRoom() *room {
 	fmt.Println("New room")
-	return &room{
+	r := &room{
 		url:       "",
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
@@ -40,6 +40,9 @@ func newRoom() *room {
 		wall:      []int{1, 2, 3, 4, 5}, //fill bones list ... (1-136)
 		wind:      1,
 	}
+	activeRooms = append(activeRooms, *r)
+	//TODO: create random url-name
+	return r
 }
 
 // AddPlayer adds new player to the room
@@ -59,7 +62,8 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		//start game after 4th player connected
 		if len(r.players) == 4 {
 			go r.run()
-			// TODO: create new room
+			//TODO: create new room
+			Room = newRoom()
 		}
 	} else {
 		panic("Players count already equals four")

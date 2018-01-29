@@ -12,15 +12,28 @@ import (
 
 const ADDR = ":8079"
 
-var Room = newRoom();
+var Room = newRoom()
+var activeRooms []room
 
 func homeHandler(c http.ResponseWriter, r *http.Request) {
 	var homeTempl = template.Must(template.ParseFiles("view/index.html"))
 	data := struct {
-		Host       string
+		Host    string
 		Players int
 	}{r.Host, len(Room.players)}
 	homeTempl.Execute(c, data)
+}
+
+func roomsHandler(w http.ResponseWriter, r *http.Request) {
+	rooms := []string{}
+	for _, room := range activeRooms {
+		rooms = append(rooms, room.url)
+	}
+	var roomsTempl = template.Must(template.ParseFiles("view/rooms.html"))
+	data := struct {
+		Rooms []string
+	}{rooms}
+	roomsTempl.Execute(w, data)
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,17 +51,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		playerName = params["name"][0]
 	}
 
-	// TODO: Get or create new room
-	//var room *room
-	//if len(freeRooms) > 0 {
-	//	for _, r := range freeRooms {
-	//		room = r
-	//		break
-	//	}
-	//} else {
-	//	room = NewRoom("")
-	//}
-
 	Room.AddPlayer(playerName, ws)
 
 	log.Printf("Player %s has joined to room", playerName)
@@ -56,6 +58,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 func Main() {
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/rooms", roomsHandler)
 	http.HandleFunc("/ws", wsHandler)
 
 	http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
