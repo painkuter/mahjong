@@ -21,36 +21,46 @@
                 };
                 conn.onmessage = function (evt) {
                     //parse data to JSON
-                    var message = $.parseJSON(evt.data);
-                    if (typeof message.status != "undefined") {
-                        switch (message.status) {
-                            case "start":
-                                log.val(log.val() + '\n' + "game started");
-                                break;
-                            case "stop":
-                                log.val(log.val() + '\n' + "game finished");
-                                break;
-                            case "game":
-                                log.val(log.val() + '\n' + "game statement updating");
-                                break;
-                            case "players":
-                                log.val(log.val() + '\n' + "player list updating");
-                                $("#players_list").appendChild("<li>" + message.body + "</li>");
-                                break;
-                            default:
-                                log.val(log.val() + '\n' + evt.data);
-                        }
-                    } else {
-                        log.val(log.val() + '\n' + evt.data);
+                    var message = JSON.parse(evt.data);
+                    console.log("Parsed");
+                    switch (message.status) {
+                        case "start":
+                            console.log("start");
+                            log.val(log.val() + '\n' + "game started");
+                            break;
+                        case "stop":
+                            console.log("stop");
+                            log.val(log.val() + '\n' + "game finished");
+                            break;
+                        case "game":
+                            console.log("game");
+                            log.val(log.val() + '\n' + "game statement updating");
+                            break;
+                        case "message":
+                            console.log("message");
+                            log.val(log.val() + '\n' + message.body);
+                            break;
+                        case "players":
+                            console.log("players");
+                            log.val(log.val() + '\n' + "player list updating");
+                            $("#players_list").appendChild("<li>" + message.body + "</li>");
+                            break;
+                        default:
+                            console.log("Parsing error");
+                            log.val(log.val() + '\n' + evt.data);
                     }
                 }
             } else {
                 window.alert("Sorry, your device does not supported");
             }
             $("#send_command").click(function () {
-                conn.send(command.val());
+                var wsMessage = {status: "message", body: command.val()};
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
                 command.val("");
             });
+
+
         });
     </script>
 </head>

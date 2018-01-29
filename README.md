@@ -4,7 +4,7 @@
     go get github.com/gorilla/websocket
 
 ### Run
-    github.com/gorilla/websocket
+    go run main.go
     
 ### Statement
 * player
@@ -20,6 +20,7 @@
 * stop game [stop]
 * update statement [game]
 * update players list [players]
+* message [message] //just text message
 
 ### TODO
 * ping-pong players

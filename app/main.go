@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -37,7 +38,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		playerName = params["name"][0]
 	}
 
-	// TODO: Get or create a room
+	// TODO: Get or create new room
 	//var room *room
 	//if len(freeRooms) > 0 {
 	//	for _, r := range freeRooms {
@@ -60,7 +61,7 @@ func Main() {
 	http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
-
+	fmt.Println("Handlers initialized")
 	if err := http.ListenAndServe(ADDR, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}

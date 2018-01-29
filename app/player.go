@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -8,21 +9,32 @@ import (
 )
 
 type player struct {
-	name string
-	ws   *websocket.Conn
-	r    *room
-	hand []int   // hand
-	dump []int   // dump
-	open [][]int //open
+	name   string
+	number int //1-4
+	ws     *websocket.Conn
+	r      *room
+	hand   []int   // hand
+	dump   []int   // dump
+	open   [][]int //open
 }
 
-func (p *player) sentStatement() {
+func (p *player) sendStatement() {
 	t := time.Now().String()
-	p.ws.WriteMessage(websocket.TextMessage, []byte("time = "+t+"\n")) //TODO: send full game statement
+	p.wsMessage("message", "time = "+t+"\n") //TODO: send full game statement
 }
 
-func (p *player) stop (){
-	p.ws.WriteMessage(websocket.TextMessage, []byte("stop"))
+// Send message to game chat
+func (p *player) sendMessage(message string) {
+	p.wsMessage("message", message)
+}
+
+func (p *player) start() {
+	p.wsMessage("start", "start")
+}
+
+func (p *player) stop() {
+	p.wsMessage("stop", "stop")
+	p.ws.WriteMessage(websocket.CloseMessage, []byte{})
 }
 
 func (p *player) receiver() {
@@ -30,10 +42,28 @@ func (p *player) receiver() {
 	for {
 		_, message, err := p.ws.ReadMessage()
 		if err != nil {
-			p.r.stop <- struct{}{}
-			panic("Error getting message from client")
+			p.r.stop <- p.number
+			fmt.Println(err)
+			break
+			//panic("Error getting message from client")
 		}
-		p.r.updateAll <- struct{}{}
-		fmt.Println(string(message))
+		// TODO: parse message here
+		var buf wsMessage
+		err = json.Unmarshal(message, &buf)
+		check(err)
+		if buf.Status == "message" {
+			p.r.message <- string(buf.Body)
+		} else {
+			p.r.updateAll <- struct{}{}
+		}
 	}
+	p.ws.Close()
+}
+
+func (p *player) wsMessage(s, b string) {
+	text, err := json.Marshal(wsMessage{Status: s, Body: b})
+	if err != nil {
+		panic(err)
+	}
+	p.ws.WriteMessage(websocket.TextMessage, text)
 }
