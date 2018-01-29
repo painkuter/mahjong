@@ -41,9 +41,9 @@
                             log.val(log.val() + '\n' + message.body);
                             break;
                         case "players":
-                            console.log("players");
-                            log.val(log.val() + '\n' + "player list updating");
-                            $("#players_list").appendChild("<li>" + message.body + "</li>");
+                            //console.log("players");
+                            //log.val(log.val() + '\n' + "players list updating");
+                            $("#players_list").html(message.body);
                             break;
                         default:
                             console.log("Parsing error");
@@ -75,6 +75,7 @@
 <br/>
 
 <textarea id="log" rows="10" cols="50"></textarea>
+<h3>Players List:</h3>
 <ul id="players_list">
 </ul>
 

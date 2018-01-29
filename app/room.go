@@ -47,6 +47,15 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	if len(r.players) < 4 {
 		p := player{name, len(r.players) + 1, ws, r, []int{3, 5, 6}, []int{}, [][]int{}} //TODO: randomize hand here
 		r.players = append(r.players, p)
+		// push player to players list:
+		for _, p_ := range r.players {
+			var players string
+			for _, p__ := range r.players { // kill me for this naming
+				players += "<li>" + p__.name + "</li>" //TODO: move to the front
+			}
+			p_.wsMessage("players", players)
+		}
+
 		//start game after 4th player connected
 		if len(r.players) == 4 {
 			go r.run()
@@ -67,7 +76,7 @@ func (r *room) run() {
 	//start the game
 	fmt.Println("Starting the game")
 	for _, p := range r.players {
-		p.wsMessage("start","")
+		p.wsMessage("start", "")
 	}
 	// waiting for some changes
 	for {
