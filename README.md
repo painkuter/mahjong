@@ -16,10 +16,10 @@
 * reserve // 
 
 ### Message list
-* start game
-* stop game
-* update statement
-* update players list
+* start game [start]
+* stop game [stop]
+* update statement [game]
+* update players list [players]
 
 ### TODO
 * ping-pong players

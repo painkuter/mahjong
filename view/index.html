@@ -6,26 +6,48 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script>
-        $( document ).ready(function() {
+        $(document).ready(function () {
             var conn;
             var command = $("#command");
             var log = $("#log");
             var name = window.prompt("Your name");
             if (window["WebSocket"]) {
                 conn = new WebSocket("ws://{{.Host}}/ws?name=" + name);
-                conn.onopen = function() {
+                conn.onopen = function () {
                     console.log("Connected");
                 };
-                conn.onclose = function(evt) {
+                conn.onclose = function (evt) {
                     console.log("Connection closed");
                 };
-                conn.onmessage = function(evt) {
-                    log.val(log.val() + '\n' + evt.data);
+                conn.onmessage = function (evt) {
+                    //parse data to JSON
+                    var message = $.parseJSON(evt.data);
+                    if (typeof message.status != "undefined") {
+                        switch (message.status) {
+                            case "start":
+                                log.val(log.val() + '\n' + "game started");
+                                break;
+                            case "stop":
+                                log.val(log.val() + '\n' + "game finished");
+                                break;
+                            case "game":
+                                log.val(log.val() + '\n' + "game statement updating");
+                                break;
+                            case "players":
+                                log.val(log.val() + '\n' + "player list updating");
+                                $("#players_list").appendChild("<li>" + message.body + "</li>");
+                                break;
+                            default:
+                                log.val(log.val() + '\n' + evt.data);
+                        }
+                    } else {
+                        log.val(log.val() + '\n' + evt.data);
+                    }
                 }
             } else {
                 window.alert("Sorry, your device does not supported");
             }
-            $("#send_command").click(function(){
+            $("#send_command").click(function () {
                 conn.send(command.val());
                 command.val("");
             });

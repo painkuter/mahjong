@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -21,11 +21,16 @@ func (p *player) sentStatement() {
 	p.ws.WriteMessage(websocket.TextMessage, []byte("time = "+t+"\n")) //TODO: send full game statement
 }
 
+func (p *player) stop (){
+	p.ws.WriteMessage(websocket.TextMessage, []byte("stop"))
+}
+
 func (p *player) receiver() {
 	fmt.Println("Listening for player " + p.name)
 	for {
 		_, message, err := p.ws.ReadMessage()
 		if err != nil {
+			p.r.stop <- struct{}{}
 			panic("Error getting message from client")
 		}
 		p.r.updateAll <- struct{}{}

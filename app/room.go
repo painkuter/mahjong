@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -64,11 +64,20 @@ func (r *room) run() {
 		select {
 		case <-r.updateAll:
 			r.updateAllPlayers()
+		case <- r.stop:
+			r.stopAllPlayers()
 		}
+
 	}
 }
 func (r *room) updateAllPlayers() {
 	for _, p := range r.players {
 		p.sentStatement()
+	}
+}
+
+func (r *room) stopAllPlayers() {
+	for _, p := range r.players {
+		p.stop()
 	}
 }
