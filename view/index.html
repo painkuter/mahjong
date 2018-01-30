@@ -48,9 +48,12 @@
                             log.val(log.val() + '\n' + message.body);
                             break;
                         case "players":
-                            //console.log("players");
-                            //log.val(log.val() + '\n' + "players list updating");
                             $("#players_list").html(message.body);
+                            message.body.forEach(function (value, index) {
+                                index++; //TODO: ? fix it
+                                index++;
+                               $("table tr:nth-child("+index+") td:nth-child(1)").append(value);
+                            });
                             break;
                         default:
                             console.log("Parsing error");
@@ -95,5 +98,50 @@
 <ul id="wall"></ul>
 <h3>Reserve:</h3>
 <ul id="reserve"></ul>
+<table>
+    <tbody>
+    <tr>
+        <td>name</td>
+        <td>hand</td>
+        <td>open</td>
+        <td>discard</td>
+        <td>current tail</td>
+        <td>wind</td>
+    </tr>
+    <tr>
+        <td>1:</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>2:</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>3:</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>4:</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+
+    </tbody>
+</table>
 </body>
 </html>

@@ -28,9 +28,10 @@ func newRoom() *room {
 
 	wall := generateWall()
 	wall = randomizeWall(wall)
+	wall, reserve:= generateReserve(wall)
 	statement := &statement{
 		Wall:    wall,
-		Reserve: generateReserve(wall),
+		Reserve: reserve,
 		Wind:    randomWind(),
 	}
 	r := &room{
@@ -52,9 +53,9 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		r.players = append(r.players, p)
 		// push player to players list:
 		for _, p_ := range r.players {
-			var players string
+			var players []string
 			for _, p__ := range r.players { // kill me for this naming
-				players += "<li>" + p__.name + "</li>" //TODO: move to the front
+				players = append(players, p__.name)
 			}
 			p_.wsMessage("players", players)
 		}
@@ -147,8 +148,8 @@ func generateWall() []string {
 	return wall
 }
 
-func generateReserve(wall []string) []string {
-	return wall[:16]
+func generateReserve(w []string) (wall, reserve []string) {
+	return  w[:16], w[:16]
 }
 
 func randomWind() int {
