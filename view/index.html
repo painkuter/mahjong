@@ -50,9 +50,7 @@
                         case "players":
                             $("#players_list").html(message.body);
                             message.body.forEach(function (value, index) {
-                                index++; //TODO: ? fix it
-                                index++;
-                               $("table tr:nth-child("+index+") td:nth-child(1)").append(value);
+                               $("table tr").eq(index+1).find("td:nth-child(1)").append(value);
                             });
                             break;
                         default:
