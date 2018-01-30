@@ -1,4 +1,18 @@
-hash: bdf5c0b43903ad8f1246f2cdfe547d87d5dcc3a4055c326109e5a2a40514e3e3
-updated: 2018-01-26T19:50:39.611683364+03:00
-imports: []
-testImports: []
+hash: 23c87788351867fc894c79f44b3c7295f220f5c51a9f53cc2d7631f870531b31
+updated: 2018-01-30T23:06:20.78879727+03:00
+imports:
+- name: github.com/gorilla/websocket
+  version: 91f589db023d66e4aba7112d44cc0d2fb091c553
+testImports:
+- name: github.com/davecgh/go-spew
+  version: db69d09d2c587e9b9677f991dfcab1fc24d9086e
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 87b1dfb5b2fa649f52695dd9eae19abe404a4308
+  subpackages:
+  - assert

@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"strconv"
 
+	"time"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -28,14 +30,14 @@ func newRoom() *room {
 
 	wall := generateWall()
 	wall = randomizeWall(wall)
-	wall, reserve:= generateReserve(wall)
+	wall, reserve := generateReserve(wall)
 	statement := &statement{
 		Wall:    wall,
 		Reserve: reserve,
 		Wind:    randomWind(),
 	}
 	r := &room{
-		url:       "",
+		url:       generateRoom(),
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
 		message:   make(chan string),
@@ -149,7 +151,7 @@ func generateWall() []string {
 }
 
 func generateReserve(w []string) (wall, reserve []string) {
-	return  w[:16], w[:16]
+	return w[:16], w[:16]
 }
 
 func randomWind() int {
@@ -159,4 +161,13 @@ func randomWind() int {
 func (s statement) statementByPlayerNumber(i int) statement {
 	//TODO: filter statement for selected player (remove foreign hands, the wall and thr reserve)
 	return s
+}
+
+func generateRoom() string {
+	var rnd *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	url := make([]byte, urlLength)
+	for i := range url {
+		url[i] = charset[rnd.Intn(len(charset))]
+	}
+	return string(url)
 }
