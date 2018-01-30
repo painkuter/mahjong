@@ -6,6 +6,9 @@
 ### Run
     go run main.go
     
+### Testing
+    go test ./...
+    
 ### Statement
 * player
     * hand
@@ -26,3 +29,6 @@
 * ping-pong players
 * run room in goroutine
 * close ws after game
+* make file
+* save history to DB
+* use cookies for identification 

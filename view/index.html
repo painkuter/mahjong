@@ -11,7 +11,7 @@
             var command = $("#command");
             var log = $("#log");
             var name = window.prompt("Your name");
-            if (window["WebSocket"]) {
+            if (window["WebSocket"]) {//supported device list?
                 conn = new WebSocket("ws://{{.Host}}/ws?name=" + name);
                 conn.onopen = function () {
                     console.log("Connected");
@@ -33,8 +33,15 @@
                             log.val(log.val() + '\n' + "game finished");
                             break;
                         case "game":
+                            // we need it only in the end to look full statement
                             console.log("game");
-                            log.val(log.val() + '\n' + "game statement updating");
+                            message.body.wall.forEach(function (value) {
+                                $("#wall").append("<li>"+value+"</li>");
+                            });
+                            message.body.reserve.forEach(function (value) {
+                                $("#reserve").append("<li>"+value+"</li>");
+                            });
+                            log.val(log.val() + '\n' + "game statement updated");
                             break;
                         case "message":
                             console.log("message");
@@ -59,8 +66,13 @@
                 conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
                 command.val("");
             });
-
-
+            // just for tests
+            $("#go").click(function () {
+                var wsMessage = {status: "game", body: command.val()};
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            })
         });
     </script>
 </head>
@@ -78,6 +90,10 @@
 <h3>Players List:</h3>
 <ul id="players_list">
 </ul>
-
+<button id="go">GO</button>
+<h3>Wall:</h3>
+<ul id="wall"></ul>
+<h3>Reserve:</h3>
+<ul id="reserve"></ul>
 </body>
 </html>

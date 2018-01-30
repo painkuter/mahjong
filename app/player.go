@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -18,9 +17,8 @@ type player struct {
 	open   [][]int //open
 }
 
-func (p *player) sendStatement() {
-	t := time.Now().String()
-	p.wsMessage("message", "time = "+t+"\n") //TODO: send full game statement
+func (p *player) sendStatement(s statement) {
+	p.wsMessage("game", s) //TODO: send full game statement
 }
 
 // Send message to game chat
@@ -51,16 +49,20 @@ func (p *player) receiver() {
 		var buf wsMessage
 		err = json.Unmarshal(message, &buf)
 		check(err)
-		if buf.Status == "message" {
-			p.r.message <- string(buf.Body)
-		} else {
+
+		switch buf.Status {
+		case "message":
+			p.r.message <- string(buf.Body.(string))
+		case "game":
+			p.r.updateAll <- struct{}{}
+		default:
 			p.r.updateAll <- struct{}{}
 		}
 	}
 	p.ws.Close()
 }
 
-func (p *player) wsMessage(s, b string) {
+func (p *player) wsMessage(s string, b interface{}) {
 	text, err := json.Marshal(wsMessage{Status: s, Body: b})
 	if err != nil {
 		panic(err)

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 
 	"github.com/gorilla/websocket"
@@ -12,15 +13,7 @@ type room struct {
 
 	players []player
 	//players map[int]player
-	//player1 *player
-	//player2 *player
-	//player3 *player
-	//player4 *player
-
-	wall    []int
-	wind    int //player number
-	step    int // current player number
-	reserve []int
+	statement *statement
 
 	// update statement for all players
 	updateAll chan struct{}
@@ -32,13 +25,20 @@ type room struct {
 
 func newRoom() *room {
 	fmt.Println("New room")
+
+	wall := generateWall()
+	wall = randomizeWall(wall)
+	statement := &statement{
+		Wall:    wall,
+		Reserve: generateReserve(wall),
+		Wind:    randomWind(),
+	}
 	r := &room{
 		url:       "",
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
 		message:   make(chan string),
-		wall:      []int{1, 2, 3, 4, 5}, //fill bones list ... (1-136)
-		wind:      1,
+		statement: statement,
 	}
 	activeRooms = append(activeRooms, *r)
 	//TODO: create random url-name
@@ -62,7 +62,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		//start game after 4th player connected
 		if len(r.players) == 4 {
 			go r.run()
-			//TODO: create new room
+			//TODO: check rooms list
 			Room = newRoom()
 		}
 	} else {
@@ -98,8 +98,8 @@ func (r *room) run() {
 
 // need factory?
 func (r *room) updateAllPlayers() {
-	for _, p := range r.players {
-		p.sendStatement()
+	for i, p := range r.players {
+		p.sendStatement(r.statement.statementByPlayerNumber(i))
 	}
 }
 
@@ -113,4 +113,49 @@ func (r *room) sendMessageToAllPlayers(message string) {
 	for _, p := range r.players {
 		p.sendMessage(message)
 	}
+}
+
+func randomizeWall(wall []string) []string {
+	list := rand.Perm(WallSize)
+	w := make([]string, WallSize)
+	for i, _ := range wall {
+		w[i] = wall[list[i]]
+	}
+	return w
+}
+
+func generateWall() []string {
+	var wall []string
+	for i := 1; i <= 4; i++ { // loop to multiply each tail by 4
+		// suites
+		for j := 1; j <= 9; j++ {
+			for k := 1; k <= 3; k++ {
+				wall = append(wall, strconv.Itoa(k)+"_"+strconv.Itoa(j)+"_"+strconv.Itoa(i))
+			}
+		}
+
+		// winds
+		for j := 1; j <= 4; j++ {
+			wall = append(wall, strconv.Itoa(4)+"_"+strconv.Itoa(j)+"_"+strconv.Itoa(i))
+		}
+
+		// dragons
+		for j := 1; j <= 3; j++ {
+			wall = append(wall, strconv.Itoa(5)+"_"+strconv.Itoa(j)+"_"+strconv.Itoa(i))
+		}
+	}
+	return wall
+}
+
+func generateReserve(wall []string) []string {
+	return wall[:16]
+}
+
+func randomWind() int {
+	return rand.Intn(4)
+}
+
+func (s statement) statementByPlayerNumber(i int) statement {
+	//TODO: filter statement for selected player (remove foreign hands, the wall and thr reserve)
+	return s
 }
