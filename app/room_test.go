@@ -8,5 +8,5 @@ import (
 
 func TestWall(t *testing.T) {
 	r := newRoom()
-	assert.Equal(t, len(r.statement.Wall) == WallSize, true)
+	assert.Equal(t, len(r.statement.Wall) == wallSize, true)
 }

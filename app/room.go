@@ -26,8 +26,7 @@ type room struct {
 }
 
 func newRoom() *room {
-	fmt.Println("New room")
-
+	url := generateUrl()
 	wall := generateWall()
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
@@ -37,14 +36,14 @@ func newRoom() *room {
 		Wind:    randomWind(),
 	}
 	r := &room{
-		url:       generateRoom(),
+		url:       url,
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
 		message:   make(chan string),
 		statement: statement,
 	}
+	fmt.Println("New room " + url)
 	activeRooms = append(activeRooms, *r)
-	//TODO: create random url-name
 	return r
 }
 
@@ -119,8 +118,8 @@ func (r *room) sendMessageToAllPlayers(message string) {
 }
 
 func randomizeWall(wall []string) []string {
-	list := rand.Perm(WallSize)
-	w := make([]string, WallSize)
+	list := rand.Perm(wallSize)
+	w := make([]string, wallSize)
 	for i, _ := range wall {
 		w[i] = wall[list[i]]
 	}
@@ -163,7 +162,7 @@ func (s statement) statementByPlayerNumber(i int) statement {
 	return s
 }
 
-func generateRoom() string {
+func generateUrl() string {
 	var rnd *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 	url := make([]byte, urlLength)
 	for i := range url {
