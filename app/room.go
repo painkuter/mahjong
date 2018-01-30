@@ -58,7 +58,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 			for _, p__ := range r.players { // kill me for this naming
 				players = append(players, p__.name)
 			}
-			p_.wsMessage("players", players)
+			p_.wsMessage(playersType, players)
 		}
 
 		//start game after 4th player connected
@@ -82,7 +82,7 @@ func (r *room) run() {
 	//start the game
 	fmt.Println("Starting the game")
 	for _, p := range r.players {
-		p.wsMessage("start", "")
+		p.start()
 	}
 	// waiting for some changes
 	for {
@@ -150,7 +150,7 @@ func generateWall() []string {
 }
 
 func generateReserve(w []string) (wall, reserve []string) {
-	return w[:16], w[:16]
+	return w[16:], w[:16]
 }
 
 func randomWind() int {

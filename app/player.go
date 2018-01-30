@@ -18,20 +18,20 @@ type player struct {
 }
 
 func (p *player) sendStatement(s statement) {
-	p.wsMessage("game", s) //TODO: send full game statement
+	p.wsMessage(gameType, s) //TODO: send full game statement
 }
 
 // Send message to game chat
 func (p *player) sendMessage(message string) {
-	p.wsMessage("message", message)
+	p.wsMessage(messageType, message)
 }
 
 func (p *player) start() {
-	p.wsMessage("start", "start")
+	p.wsMessage(startType, "start")
 }
 
 func (p *player) stop() {
-	p.wsMessage("stop", "stop")
+	p.wsMessage(stopType, "stop")
 	p.ws.WriteMessage(websocket.CloseMessage, []byte{})
 }
 
@@ -51,9 +51,9 @@ func (p *player) receiver() {
 		check(err)
 
 		switch buf.Status {
-		case "message":
+		case messageType:
 			p.r.message <- string(buf.Body.(string))
-		case "game":
+		case gameType:
 			p.r.updateAll <- struct{}{}
 		default:
 			p.r.updateAll <- struct{}{}
