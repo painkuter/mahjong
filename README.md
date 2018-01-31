@@ -41,3 +41,4 @@
 * use cookies for identification 
 * connect to the room by URL
 * error's pages
+* separate loggers for dev and prod

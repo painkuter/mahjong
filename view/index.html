@@ -13,8 +13,11 @@
             var command = $("#command");
             var log = $("#log");
             var name = window.prompt("Your name");
+            var host = "{{.Host}}";
             if (window["WebSocket"]) {//supported device list?
-                conn = new WebSocket("ws://{{.Host}}/ws?name=" + name);
+                roomURL = window.location.href.substring(window.location.href.indexOf(host) + host.length + 5); //rewrite it
+                console.log(roomURL);
+                conn = new WebSocket("ws://"+host+"/ws?room="+roomURL+"&name=" + name);
                 conn.onopen = function () {
                     console.log("Connected");
                 };

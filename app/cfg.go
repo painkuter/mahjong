@@ -10,6 +10,7 @@ const (
 	urlLength = 8 //url length
 	// Game
 	wallSize  = 136
+	reserveSize = 16
 	//wsMessage types:
 	gameType  = "game"
 	messageType = "message"

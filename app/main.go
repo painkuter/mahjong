@@ -11,13 +11,11 @@ import (
 )
 
 var (
-	activeRooms  []room
 	activeRooms_ = make(map[string]*room)
 	Room         *room
-	// Init templates
 )
 
-func roomHandler(c http.ResponseWriter, r *http.Request) {
+func roomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
 	check(err)
 	if roomUrl == "room" {
@@ -25,7 +23,8 @@ func roomHandler(c http.ResponseWriter, r *http.Request) {
 	} else {
 		if len(roomUrl) != urlLength {
 			logger.Error("Wrong room-url")
-			return // 400
+			http.Error(w,"Room not found", 404)
+			return
 		}
 	}
 	var homeTempl = template.Must(template.ParseFiles("view/index.html"))
@@ -34,7 +33,7 @@ func roomHandler(c http.ResponseWriter, r *http.Request) {
 		RoomName string
 		Players  int
 	}{r.Host, roomUrl, len(Room.players)}
-	homeTempl.Execute(c, data)
+	homeTempl.Execute(w, data)
 }
 
 func roomsListHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,15 +50,7 @@ func roomsListHandler(w http.ResponseWriter, r *http.Request) {
 
 func newRoomHandler(w http.ResponseWriter, r *http.Request) {
 	room := newRoom()
-	http.Redirect(w, r, "/room/"+room.url, 301)
-}
-
-func connectRoomHandler(w http.ResponseWriter, r *http.Request) {
-	roomUrl := r.URL.Path[1:]
-	ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
-	check(err)
-	playerName := getPlayerName(r)
-	activeRooms_[roomUrl].AddPlayer(playerName, ws)
+	http.Redirect(w, r, "/room/"+room.url, 302)
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,26 +59,26 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not a websocket handshake", 400)
 		return
 	} else if err != nil {
-		// TODO: logging
-		// check(err)
+		logger.Error(err)
+		http.Error(w, "Runtime error", 500)
 		return
 	}
 
 	playerName := getPlayerName(r)
+	roomURL := getRoomURL(r)
+	activeRooms_[roomURL].AddPlayer(playerName, ws)
 
-	Room.AddPlayer(playerName, ws)
-
-	logger.Infof("Player %s has joined to room %s", playerName, Room.url)
+	logger.Infof("Player %s has joined to room %s", playerName, roomURL)
 }
 
 func Main() {
-	Room  = newRoom()
+	Room = newRoom()
 	rh := http.RedirectHandler("/room", 301)
 	http.Handle("/", rh)                             // Path to redirect to connect default room
 	http.HandleFunc("/room", roomHandler)            // Path to connect default room
 	http.HandleFunc("/rooms-list", roomsListHandler) // Rooms list
 	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
-	http.HandleFunc("/new-room", newRoomHandler)     // Path to create new room -> redirectin to /room/[URL]
+	http.HandleFunc("/new-room", newRoomHandler)     // Path to create new room -> redirecting to /room/[URL]
 	http.HandleFunc("/ws", wsHandler)
 	//http.HandleFunc("/new-room", newRoomWsHandler)
 
@@ -107,4 +98,19 @@ func getPlayerName(r *http.Request) string {
 		playerName = params["name"][0]
 	}
 	return playerName
+}
+
+func getRoomURL(r *http.Request) string {
+	params, _ := url.ParseQuery(r.URL.RawQuery)
+	if len(params["room"]) > 0 {
+		if _, ok := activeRooms_[params["room"][0]]; ok{
+			//room found
+			return params["room"][0]
+		}
+		return Room.url
+	}
+	// this way is error
+	logger.Error("Error getting room-parameter")
+	// Need to return 400 to client
+	return Room.url
 }

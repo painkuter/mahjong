@@ -30,11 +30,13 @@ func newRoom() *room {
 	wall := generateWall()
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
+
 	statement := &statement{
 		Wall:    wall,
 		Reserve: reserve,
 		Wind:    randomWind(),
 	}
+
 	r := &room{
 		url:       url,
 		updateAll: make(chan struct{}),
@@ -43,7 +45,6 @@ func newRoom() *room {
 		statement: statement,
 	}
 	logger.Info("New room " + url)
-	//activeRooms = append(activeRooms, *r)
 	activeRooms_[r.url] = r
 	return r
 }
@@ -152,7 +153,7 @@ func generateWall() []string {
 }
 
 func generateReserve(w []string) (wall, reserve []string) {
-	return w[16:], w[:16]
+	return w[reserveSize:], w[:reserveSize]
 }
 
 func randomWind() int {
@@ -165,7 +166,7 @@ func (s statement) statementByPlayerNumber(i int) statement {
 }
 
 func generateUrl() string {
-	var rnd *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	url := make([]byte, urlLength)
 	for i := range url {
 		url[i] = charset[rnd.Intn(len(charset))]

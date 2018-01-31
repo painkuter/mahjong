@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
@@ -37,14 +36,13 @@ func (p *player) stop() {
 }
 
 func (p *player) receiver() {
-	fmt.Println("Listening for player " + p.name)
+	logger.Info("Listening for player " + p.name)
 	for {
 		_, message, err := p.ws.ReadMessage()
 		if err != nil {
 			p.r.stop <- p.number
-			fmt.Println(err)
+			logger.Error(err)
 			break
-			//panic("Error getting message from client")
 		}
 		// TODO: parse message here
 		var buf wsMessage
