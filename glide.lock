@@ -1,18 +1,28 @@
 hash: 23c87788351867fc894c79f44b3c7295f220f5c51a9f53cc2d7631f870531b31
-updated: 2018-01-30T23:06:20.78879727+03:00
+updated: 2018-01-31T20:04:32.107044195+07:00
 imports:
+- name: github.com/codemodus/parth
+  version: 1dfb9e71a4c105d5c2062ebf8132a13a440e7f75
+- name: github.com/google/logger
+  version: 09d434b1e522d216684d09421cd0b0213c96c787
 - name: github.com/gorilla/websocket
   version: 91f589db023d66e4aba7112d44cc0d2fb091c553
+- name: golang.org/x/sys
+  version: 3dbebcf8efb6a5011a60c2b4591c1022a759af8a
+  subpackages:
+  - windows
+  - windows/registry
+  - windows/svc/eventlog
 testImports:
 - name: github.com/davecgh/go-spew
-  version: db69d09d2c587e9b9677f991dfcab1fc24d9086e
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 87b1dfb5b2fa649f52695dd9eae19abe404a4308
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert

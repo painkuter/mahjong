@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -65,7 +66,7 @@ func (p *player) receiver() {
 func (p *player) wsMessage(s string, b interface{}) {
 	text, err := json.Marshal(wsMessage{Status: s, Body: b})
 	if err != nil {
-		panic(err)
+		logger.Error(err)
 	}
 	p.ws.WriteMessage(websocket.TextMessage, text)
 }

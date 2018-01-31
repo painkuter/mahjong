@@ -1,10 +1,17 @@
-# mahjong
+# Mahjong
 
 ### Installation
-    go get github.com/gorilla/websocket
+    curl https://glide.sh/get | sh
+    glide install
 
 ### Run
     go run main.go
+    
+### Links
+    /room
+    /room/[URL]
+    /new-room
+    /rooms-list    
     
 ### Testing
     go test ./...
@@ -29,6 +36,8 @@
 * ping-pong players
 * run room in goroutine
 * close ws after game
-* make file
+* makefile
 * save history to DB
 * use cookies for identification 
+* connect to the room by URL
+* error's pages

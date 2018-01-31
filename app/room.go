@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
-
 	"time"
 
+	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -42,8 +42,9 @@ func newRoom() *room {
 		message:   make(chan string),
 		statement: statement,
 	}
-	fmt.Println("New room " + url)
-	activeRooms = append(activeRooms, *r)
+	logger.Info("New room " + url)
+	//activeRooms = append(activeRooms, *r)
+	activeRooms_[r.url] = r
 	return r
 }
 
@@ -68,7 +69,8 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 			Room = newRoom()
 		}
 	} else {
-		panic("Players count already equals four")
+		logger.Fatal("Players count already equals four")
+		//TODO: return some error
 	}
 }
 
