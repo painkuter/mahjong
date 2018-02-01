@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-cache"/>
     <title>Index</title>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -17,7 +17,7 @@
             if (window["WebSocket"]) {//supported device list?
                 roomURL = window.location.href.substring(window.location.href.indexOf(host) + host.length + 5); //rewrite it
                 console.log(roomURL);
-                conn = new WebSocket("ws://"+host+"/ws?room="+roomURL+"&name=" + name);
+                conn = new WebSocket("ws://" + host + "/ws?room=" + roomURL + "&name=" + name);
                 conn.onopen = function () {
                     console.log("Connected");
                 };
@@ -41,7 +41,7 @@
                             // we need it only in the end to look full statement
                             console.log("game");
                             console.log(evt.data);
-/*                            message.body.wall.forEach(function (value) {
+                            /*message.body.wall.forEach(function (value) {
                                 $("#wall").append("<li>"+value+"</li>");
                             });
                             message.body.reserve.forEach(function (value) {
@@ -56,7 +56,7 @@
                         case "players":
                             $("#players_list").html(message.body);
                             message.body.forEach(function (value, index) {
-                               $("table tr").eq(index+1).find("td:nth-child(1)").append(value);
+                                $("table tr").eq(index + 1).find("td:nth-child(1)").append(value);
                             });
                             break;
                         default:
@@ -75,7 +75,15 @@
             });
             // just for tests
             $("#go").click(function () {
-                var wsMessage = {status: "game", body: command.val()};
+                var turn = {
+                    status: "skip",
+                    meld: "",
+                    tiles: []
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
                 console.log(JSON.stringify(wsMessage));
                 conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
                 command.val("");
@@ -99,7 +107,7 @@
 <ul id="players_list">
 </ul>
 <button id="go">GO</button>
-
+<p id="statement"></p>
 <table>
     <tbody>
     <tr>

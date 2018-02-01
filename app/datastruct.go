@@ -8,17 +8,22 @@ type wsMessage struct {
 }
 
 type statement struct {
-	Players map[int]playerStatement `json:"players"`
-	Wall    []string                `json:"wall"`
-	Wind    int                     `json:"wind"` //wind of game
-	Step    int                     `json:"step"` //current player number
-	Reserve []string                `json:"reserve"`
+	Players map[string]playerStatement `json:"players"`
+	Wall    []string                   `json:"wall"`
+	Wind    int                        `json:"wind"` //wind of game
+	Step    int                        `json:"step"` //current player number
+	Reserve []string                   `json:"reserve"`
 }
 
 type playerStatement struct {
+	CurrentTile string     `json:"current_tile"` // [private]
 	Hand        []string   `json:"hand"`         // [private]
 	Discard     []string   `json:"discard"`      // [public]
 	Open        [][]string `json:"open"`         // [public]
-	CurrentTail string     `json:"current_tail"` // [private]
 	Wind        int        `json:"wind"`         // [public]
+}
+type playerCommand struct {
+	Status string   `json:"status"` // skip / discard / announce
+	Meld   string   `json:"meld"`   // chow / pong / kong
+	Tiles  []string `json:"tiles"`
 }

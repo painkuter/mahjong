@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
@@ -48,10 +49,16 @@ func (p *player) receiver() {
 
 		switch buf.Status {
 		case messageType:
-			p.r.message <- string(buf.Body.(string))
+			request, ok := buf.Body.(string)
+			if !ok{
+				// TODO: handle error
+				logger.Error("Error parsing message body")
+				continue
+			}
+			p.r.message <- request
 		case gameType:
 			//TODO: update statement
-			processStatement()
+			processStatement(buf.Body)
 			p.r.updateAll <- struct{}{}
 		default:
 			p.r.updateAll <- struct{}{}

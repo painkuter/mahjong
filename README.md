@@ -29,6 +29,7 @@
 * start game [start]
 * stop game [stop]
 * update statement [game]
+    * skip announce [skip]
     * move tail to discard [discard]
     * announce combination [announce]
         * Chow [chow]

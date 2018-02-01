@@ -32,16 +32,16 @@ func newRoom() *room {
 	wall, reserve := generateReserve(wall)
 
 	statement := &statement{
-		Players: make(map[int]playerStatement, 4),
+		Players: make(map[string]playerStatement, 4),
 		Reserve: reserve,
 		Wind:    randomWind(),
 	}
 	// Fill players statements
-	for i := 0; i < 4; i++ {
+	for i := 1; i <= 4; i++ {
 		var hand []string
 		wall, hand = generateHand(wall)
 		pStatement := playerStatement{Hand: hand}
-		statement.Players[i] = pStatement
+		statement.Players[strconv.Itoa(i)] = pStatement
 		//TODO: add wind
 	}
 
@@ -142,7 +142,7 @@ func randomizeWall(wall []string) []string {
 
 func generateWall() []string {
 	var wall []string
-	for i := 1; i <= 4; i++ { // loop to multiply each tail by 4
+	for i := 1; i <= 4; i++ { // loop to multiply each tile by 4
 		// suites
 		for j := 1; j <= 9; j++ {
 			for k := 1; k <= 3; k++ {
@@ -178,14 +178,14 @@ func randomWind() int {
 func (s statement) statementByPlayerNumber(playerNumber int) statement {
 	// filter statement for selected player (remove foreign hands, the wall and thr reserve)
 	privateStatement := statement{
-		Players: make(map[int]playerStatement, 4),
+		Players: make(map[string]playerStatement, 4),
 		Step: s.Step,
 		Wind: s.Wind,
 	}
 
 	for j, player := range s.Players {
-		if j == playerNumber {
-			privateStatement.Players[j] = player
+		if j == strconv.Itoa(playerNumber) {
+			privateStatement.Players["me"] = player
 		} else {
 			privateStatement.Players[j] = playerStatement{
 				Open:    player.Open,
