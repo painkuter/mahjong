@@ -12,8 +12,15 @@ func processStatement(command interface{}) {
 	err := ms.Decode(command, &c)
 	if err != nil {
 		logger.Warning(err)
+		return
 	}
-	return
 
+	switch c.Status {
+	case skipCommand:
+	case announceCommand:
+	case discardCommand:
+	default:
+		//TODO: handle error
+	}
 	// TODO: handle
 }

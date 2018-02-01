@@ -1,0 +1,53 @@
+{
+  "status": "game",
+  "body": {
+    "players": {
+      "1": {
+        "hand": null,
+        "discard": null,
+        "open": null,
+        "current_tile": "",
+        "wind": 0
+      },
+      "2": {
+        "hand": null,
+        "discard": null,
+        "open": null,
+        "current_tile": "",
+        "wind": 0
+      },
+      "3": {
+        "hand": null,
+        "discard": null,
+        "open": null,
+        "current_tile": "",
+        "wind": 0
+      },
+      "me": {
+        "hand": [
+          "2_1_3",
+          "3_7_1",
+          "2_6_2",
+          "2_7_3",
+          "3_4_3",
+          "4_2_1",
+          "5_3_2",
+          "5_2_3",
+          "3_1_2",
+          "1_8_2",
+          "2_2_4",
+          "2_9_3",
+          "3_8_3"
+        ],
+        "discard": null,
+        "open": null,
+        "current_tile": "",
+        "wind": 0
+      }
+    },
+    "wall": null,
+    "wind": 0,
+    "step": 0,
+    "reserve": null
+  }
+}

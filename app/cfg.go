@@ -5,7 +5,8 @@ const (
 	ADDR = ":8079"
 	logFile = "logs/log_"
 	timeout = 60*60*1000
-	turntime = 60*1000 // 1 minute for the turn
+	announceTime = 10*1000 // 10 sec to announce meld
+	turnTime = 60*1000 // 1 minute for the turn
 	charset   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	urlLength = 8 //url length
 	// Game
@@ -18,4 +19,8 @@ const (
 	playersType = "players"
 	startType   = "start"
 	stopType = "stop"
+	//game commands:
+	skipCommand = "skip"
+	discardCommand = "discard"
+	announceCommand = "announce"
 )
