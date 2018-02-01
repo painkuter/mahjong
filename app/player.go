@@ -12,9 +12,6 @@ type player struct {
 	number int //1-4
 	ws     *websocket.Conn
 	r      *room
-	hand   []int   // hand
-	dump   []int   // dump
-	open   [][]int //open
 }
 
 func (p *player) sendStatement(s statement) {
@@ -53,6 +50,8 @@ func (p *player) receiver() {
 		case messageType:
 			p.r.message <- string(buf.Body.(string))
 		case gameType:
+			//TODO: update statement
+			processStatement()
 			p.r.updateAll <- struct{}{}
 		default:
 			p.r.updateAll <- struct{}{}

@@ -29,6 +29,13 @@
 * start game [start]
 * stop game [stop]
 * update statement [game]
+    * move tail to discard [discard]
+    * announce combination [announce]
+        * Chow [chow]
+        * Pong [pong]
+        * Kong [kong]
+            * get tail from reserve
+        
 * update players list [players]
 * message [message] //just text message
 

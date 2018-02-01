@@ -11,6 +11,7 @@ const (
 	// Game
 	wallSize  = 136
 	reserveSize = 16
+	handSize = 13
 	//wsMessage types:
 	gameType  = "game"
 	messageType = "message"

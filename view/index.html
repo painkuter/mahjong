@@ -40,12 +40,13 @@
                         case "game":
                             // we need it only in the end to look full statement
                             console.log("game");
-                            message.body.wall.forEach(function (value) {
+                            console.log(evt.data);
+/*                            message.body.wall.forEach(function (value) {
                                 $("#wall").append("<li>"+value+"</li>");
                             });
                             message.body.reserve.forEach(function (value) {
                                 $("#reserve").append("<li>"+value+"</li>");
-                            });
+                            });*/
                             log.val(log.val() + '\n' + "game statement updated");
                             break;
                         case "message":

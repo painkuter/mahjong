@@ -32,10 +32,20 @@ func newRoom() *room {
 	wall, reserve := generateReserve(wall)
 
 	statement := &statement{
-		Wall:    wall,
+		Players: make(map[int]playerStatement, 4),
 		Reserve: reserve,
 		Wind:    randomWind(),
 	}
+	// Fill players statements
+	for i := 0; i < 4; i++ {
+		var hand []string
+		wall, hand = generateHand(wall)
+		pStatement := playerStatement{Hand: hand}
+		statement.Players[i] = pStatement
+		//TODO: add wind
+	}
+
+	statement.Wall = wall
 
 	r := &room{
 		url:       url,
@@ -52,8 +62,9 @@ func newRoom() *room {
 // AddPlayer adds new player to the room
 func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	if len(r.players) < 4 {
-		p := player{name, len(r.players) + 1, ws, r, []int{3, 5, 6}, []int{}, [][]int{}} //TODO: randomize hand here
+		p := player{name, len(r.players) + 1, ws, r}
 		r.players = append(r.players, p)
+
 		// push player to players list:
 		for _, p_ := range r.players {
 			var players []string
@@ -156,13 +167,34 @@ func generateReserve(w []string) (wall, reserve []string) {
 	return w[reserveSize:], w[:reserveSize]
 }
 
+func generateHand(w []string) (wall, hand []string) {
+	return w[handSize:], w[:handSize]
+}
+
 func randomWind() int {
 	return rand.Intn(4)
 }
 
-func (s statement) statementByPlayerNumber(i int) statement {
-	//TODO: filter statement for selected player (remove foreign hands, the wall and thr reserve)
-	return s
+func (s statement) statementByPlayerNumber(playerNumber int) statement {
+	// filter statement for selected player (remove foreign hands, the wall and thr reserve)
+	privateStatement := statement{
+		Players: make(map[int]playerStatement, 4),
+		Step: s.Step,
+		Wind: s.Wind,
+	}
+
+	for j, player := range s.Players {
+		if j == playerNumber {
+			privateStatement.Players[j] = player
+		} else {
+			privateStatement.Players[j] = playerStatement{
+				Open:    player.Open,
+				Discard: player.Discard,
+			}
+		}
+	}
+
+	return privateStatement
 }
 
 func generateUrl() string {
