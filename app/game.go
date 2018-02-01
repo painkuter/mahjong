@@ -17,10 +17,18 @@ func processStatement(command interface{}) {
 
 	switch c.Status {
 	case skipCommand:
+		// skip timer after 3 skips
 	case announceCommand:
 	case discardCommand:
+		// timer
 	default:
 		//TODO: handle error
 	}
 	// TODO: handle
+}
+
+func (s *statement) getFromWall() {
+	currentPlayer := s.Players[s.Step]
+	currentPlayer.CurrentTile = s.Wall[1]
+	s.Wall = s.Wall[1:]
 }

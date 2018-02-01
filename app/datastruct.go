@@ -8,11 +8,12 @@ type wsMessage struct {
 }
 
 type statement struct {
-	Players map[string]playerStatement `json:"players"`
-	Wall    []string                   `json:"wall"`
-	Wind    int                        `json:"wind"` //wind of game
-	Step    int                        `json:"step"` //current player number
-	Reserve []string                   `json:"reserve"`
+	Players map[int]playerStatement `json:"players"`
+	Wall    []string                `json:"wall"`
+	East    int                     `json:"east"` //east-player number (1-4)
+	Wind    int                     `json:"wind"` //wind of round (changing after 4 rounds)
+	Step    int                     `json:"step"` //current player number
+	Reserve []string                `json:"reserve"`
 }
 
 type playerStatement struct {

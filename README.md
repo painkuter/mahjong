@@ -21,7 +21,8 @@
     * hand
     * dump
 * wall // list of wall's elements
-* wind // current wind number (1-east, 2-north, 3-west, 4-south)
+* wind // current wind number (1-east, 2-south, 3-west, 4-north)
+* east // east-player number
 * step // current player's number
 * reserve // 
 

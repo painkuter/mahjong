@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -13,8 +12,8 @@ import (
 type room struct {
 	url string
 
-	players []player
-	//players map[int]player
+	players []playerConn
+	//players map[int]playerConn
 	statement *statement
 
 	// update statement for all players
@@ -30,18 +29,21 @@ func newRoom() *room {
 	wall := generateWall()
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
+	east := randomEast()
 
 	statement := &statement{
-		Players: make(map[string]playerStatement, 4),
+		Players: make(map[int]playerStatement, 4),
 		Reserve: reserve,
-		Wind:    randomWind(),
+		East:    east,
+		Wind:    1,    //East = 1
+		Step:    east, //starting from east
 	}
 	// Fill players statements
 	for i := 1; i <= 4; i++ {
 		var hand []string
 		wall, hand = generateHand(wall)
 		pStatement := playerStatement{Hand: hand}
-		statement.Players[strconv.Itoa(i)] = pStatement
+		statement.Players[i] = pStatement
 		//TODO: add wind
 	}
 
@@ -59,10 +61,10 @@ func newRoom() *room {
 	return r
 }
 
-// AddPlayer adds new player to the room
+// AddPlayer adds new playerConn to the room
 func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	if len(r.players) < 4 {
-		p := player{name, len(r.players) + 1, ws, r}
+		p := playerConn{name, len(r.players) + 1, ws, r}
 		r.players = append(r.players, p)
 
 		// push player to players list:
@@ -93,18 +95,24 @@ func (r *room) run() {
 		go p_.receiver()
 	}
 
-	//start the game
-	fmt.Println("Starting the game")
+	// start the game
+	logger.Info("Starting the game")
 	for _, p := range r.players {
+		//TODO: check the players
 		p.start()
 	}
+
+	// first turn
+	r.statement.getFromWall()
+	r.updateAllPlayers()
+
 	// waiting for some changes
 	for {
 		select {
 		case <-r.updateAll:
 			r.updateAllPlayers()
 		case pNumber := <-r.stop:
-			fmt.Println("Player #" + strconv.Itoa(pNumber) + " stopped the game")
+			logger.Info("Player #" + strconv.Itoa(pNumber) + " stopped the game")
 			r.stopAllPlayers()
 		case pMessage := <-r.message:
 			r.sendMessageToAllPlayers(pMessage)
@@ -171,21 +179,22 @@ func generateHand(w []string) (wall, hand []string) {
 	return w[handSize:], w[:handSize]
 }
 
-func randomWind() int {
-	return rand.Intn(4)
+func randomEast() int {
+	return rand.Intn(4) + 1 // 1-4, not 0-3
 }
 
 func (s statement) statementByPlayerNumber(playerNumber int) statement {
-	// filter statement for selected player (remove foreign hands, the wall and thr reserve)
+	// filter statement for selected playerConn (remove foreign hands, the wall and thr reserve)
 	privateStatement := statement{
-		Players: make(map[string]playerStatement, 4),
-		Step: s.Step,
-		Wind: s.Wind,
+		Players: make(map[int]playerStatement, 4),
+		Step:    s.Step,
+		Wind:    s.Wind,
+		East:    s.East,
 	}
 
 	for j, player := range s.Players {
-		if j == strconv.Itoa(playerNumber) {
-			privateStatement.Players["me"] = player
+		if j == playerNumber {
+			privateStatement.Players[j] = player
 		} else {
 			privateStatement.Players[j] = playerStatement{
 				Open:    player.Open,
