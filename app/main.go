@@ -80,7 +80,8 @@ func Main() {
 	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
 	http.HandleFunc("/new-room", newRoomHandler)     // Path to create new room -> redirecting to /room/[URL]
 	http.HandleFunc("/ws", wsHandler)
-	//http.HandleFunc("/new-room", newRoomWsHandler)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, r.URL.Path[1:])
