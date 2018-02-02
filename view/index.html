@@ -1,188 +1,199 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="cache-control" content="no-cache"/>
-    <title>Index</title>
-
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            //TODO: get room URL
-            var conn;
-            var command = $("#command");
-            var log = $("#log");
-            //var name = window.prompt("Your name");
-            var name = "pName";
-            var host = "{{.Host}}";
-            if (window["WebSocket"]) {//supported device list?
-                roomURL = window.location.href.substring(window.location.href.indexOf(host) + host.length + 5); //rewrite it
-                console.log(roomURL);
-                conn = new WebSocket("ws://" + host + "/ws?room=" + roomURL + "&name=" + name);
-                conn.onopen = function () {
-                    console.log("Connected");
-                };
-                conn.onclose = function (evt) {
-                    console.log("Connection closed");
-                };
-                conn.onmessage = function (evt) {
-                    //parse data to JSON
-                    var message = JSON.parse(evt.data);
-                    console.log("Parsed");
-                    switch (message.status) {
-                        case "start":
-                            console.log("start");
-                            log.val(log.val() + '\n' + "game started");
-                            break;
-                        case "stop":
-                            console.log("stop");
-                            log.val(log.val() + '\n' + "game finished");
-                            break;
-                        case "game":
-                            console.log(evt.data);
-                            /*message.body.wall.forEach(function (value) {
-                                $("#wall").append("<li>"+value+"</li>");
-                            });
-                            message.body.reserve.forEach(function (value) {
-                                $("#reserve").append("<li>"+value+"</li>");
-                            });*/
-                            var me = message.body.players["100"];
-                            $("#hand").html("");
-                            me.hand.forEach(function (value) {
-                                $("#hand").append('<li><button class="tile">' + value + '</button></li>');
-                            });
-                            if (me.discard != null) {
-                                $("#discard").html("");
-                                me.discard.forEach(function (value) {
-                                    $("#discard").append('<li><span>' + value + '</span></li>');
-                                });
-                            }
-                            $("#current_tile").text(me.current_tile);
-
-                            log.val(log.val() + '\n' + "game statement updated");
-                            break;
-                        case "message":
-                            console.log("message");
-                            log.val(log.val() + '\n' + message.body);
-                            break;
-                        case "players":
-                            $("#players_list").html(message.body);
-                            message.body.forEach(function (value, index) {
-                                $("table tr").eq(index + 1).find("td:nth-child(1)").append(value);
-                            });
-                            break;
-                        default:
-                            console.log("Parsing error");
-                            log.val(log.val() + '\n' + evt.data);
-                    }
-                }
-            } else {
-                window.alert("Sorry, your device does not supported");
-            }
-            $("#send_message").click(function () {
-                var wsMessage = {status: "message", body: $("#message").val()};
-                console.log(JSON.stringify(wsMessage));
-                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
-                command.val("");
-            });
-            $("#send_command").click(function () {
-                var turn = {
-                    status: "discard",
-                    meld: "",
-                    tiles: [command.val()]
-                };
-                var wsMessage = {
-                    status: "game",
-                    body: turn
-                };
-                console.log(JSON.stringify(wsMessage));
-                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
-                command.val("");
-            });
-            // just for tests
-            $("#go").click(function () {
-                var turn = {
-                    status: "skip",
-                    meld: "",
-                    tiles: []
-                };
-                var wsMessage = {
-                    status: "game",
-                    body: turn
-                };
-                console.log(JSON.stringify(wsMessage));
-                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
-                command.val("");
-            });
-            $("#announce").click(function () {
-                var turn = {
-                    status: "announce",
-                    meld: "",
-                    tiles: []
-                };
-                var wsMessage = {
-                    status: "game",
-                    body: turn
-                };
-                console.log(JSON.stringify(wsMessage));
-                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
-                command.val("");
-            });
-            $("body").on("click", ".tile", function () {
-                var turn = {
-                    status: "discard",
-                    meld: "",
-                    tiles: [$(this).text()]
-                };
-                var wsMessage = {
-                    status: "game",
-                    body: turn
-                };
-                console.log(JSON.stringify(wsMessage));
-                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
-            });
-        });
-    </script>
+  <meta charset="utf-8">
+  <title>Hello World</title>
 </head>
+  <script src="../static/pixi/pixi.min.js"></script>
+  <script type="text/javascript" src="../static/data.json"></script>
 <body>
+<script type="text/javascript">
+    let gameData = {
+    "status":"game",
+    "body":{
+      "players":{
+        "0":{
+          "hand":null,
+          "discard":[],
+          "open":null,
+          "current_tile":"",
+          "wind":1
+        },
+        "1":{
+          "hand":null,
+          "discard":[],
+          "open":null,
+          "current_tile":"",
+          "wind":2
+        },
+        "2":{
+          "hand":null,
+          "discard":[],
+          "open":null,
+          "current_tile":"",
+          "wind":3
+        },
+        "100":{
+          "hand":[
+            "1_9_2",
+            "3_3_3",
+            "3_1_3",
+            "3_4_1",
+            "4_2_3",
+            "3_9_2",
+            "3_9_4",
+            "1_1_2",
+            "1_8_4",
+            "4_4_1",
+            "2_8_1",
+            "2_8_4",
+            "1_9_1"
+          ],
+          "discard":[
+            "1_9_3",
+            "3_3_2",
+            "3_1_2",
+            "3_4_4",
+            "3_2_2",
+            "1_2_2",
+            "3_3_1",
+            "2_6_1"
+          ],
+          "open":null,
+          "current_tile":"",
+          "wind":4
+        }
+      },
+      "wall":null,
+      "wind":1,
+      "step":1,
+      "reserve":null
+      }
+    };
+    let type = "WebGL";
+    if(!PIXI.utils.isWebGLSupported()){
+      type = "canvas"
+    }
 
-<h1>Hello</h1>
-<p>Room name: {{.RoomName}}</p>
-<p>Players number: {{.Players}}</p>
+    let tileStack = {};
+    let myStack = [];
 
-<input type="text" id="command" name="command" value="">
-<button id="send_command">Send</button>
+    PIXI.utils.sayHello(type);
+    let app = new PIXI.Application({width: 1200, height: 900});
+    app.renderer.backgroundColor = 0xffffff;
+    //Add the canvas that Pixi automatically created for you to the HTML document
+    document.body.appendChild(app.view);
+    PIXI.loader
+            .add("mahjongTiles", "/static/images/tiles-mahjong.jpg")
+            .load(setup);
 
-<br/>
+    function createTile(texture, rect, name) {
 
-<input type="text" id="message" name="message" value="">
-<button id="send_message">Send message</button>
+      let sprite = new PIXI.Sprite(new PIXI.Texture(texture, rect, name));
+      sprite.width = 50;
+      sprite.height = 70;
+      let tile = {
+        "name" : name,
+        "sprite" :sprite
+      };
+      return tile;
+    }
 
-<br>
+    function setup() {
+      load();
 
-<textarea id="log" rows="10" cols="50"></textarea>
-<h3>Players List:</h3>
-<ul id="players_list">
-</ul>
+      let me = getMe();
+      app.stage.addChild(me);
+      //Render the stage
+      app.renderer.render(app.stage);
+    }
 
-<button id="go">Skip</button>
-<button id="announce">Announce</button>
-<br>
+    function getMe() {
+      let me = new PIXI.Container();
+      for (var i in gameData.body.players["100"].hand){
+        var tile = tileStack[gameData.body.players["100"].hand[i]];
+        tile.sprite.interactive = true;
+        tile.sprite.buttonMode = true;
+        tile.sprite.on("pointerdown", onSelect);
+        myStack.push(tile);
+      }
+      myStack.sort(handSort);
 
-<h3>Current tile:</h3><br>
-<button id="current_tile" class="tile"></button>
+      let discard = getDiscard(gameData.body.players["100"]);
+      me.addChild(discard);
+      for(var i in myStack) {
+        myStack[i].sprite.x = (myStack[i].sprite.width+2)*i;
+        myStack[i].sprite.y = discard.height+100;
+        me.addChild(myStack[i].sprite);
+      }
 
-<br>
+      discard.position.x = me.width/2 - discard.width/2;
 
-<h3>My hand:</h3>
-<ul id="hand"></ul>
+      me.position.x = app.renderer.view.width/2 - me.width/2;
+      me.position.y = app.renderer.view.height - (me.height + 10);
 
-<h3>discard:</h3>
-<ul id="discard"></ul>
+      return me;
+    }
 
-<h3>Wall:</h3>
-<ul id="wall"></ul>
-<h3>Reserve:</h3>
-<ul id="reserve"></ul>
+    function getDiscard(player) {
+      let discard = new PIXI.Container();
+      var col = 0;
+      var row = 0;
+      for (var i in player.discard){
+        var tile = tileStack[player.discard[i]];
+
+        tile.sprite.width = 40;
+        tile.sprite.height = 56;
+        tile.sprite.x = (tile.sprite.width+2)*col;
+        tile.sprite.y = (tile.sprite.height+2)*row;
+        discard.addChild(tile.sprite);
+
+        if(i%5 == 0 && i>0){
+          col = 0;
+          row++;
+        }else{
+          col++;
+        }
+      }
+
+      return discard;
+    }
+
+    function onSelect() {
+      if(!this.isSelected) {
+        for(var index in myStack) {
+          var tile = myStack[index];
+          if(tile.sprite.isSelected){
+            tile.sprite.y += 15;
+            tile.sprite.isSelected = false;
+            break;
+          }
+        }
+        this.isSelected = true;
+        this.y -= 15;
+      }
+    }
+
+    function load() {
+      for (var index in tiles_data.mahjong_tiles) {
+        var value = tiles_data.mahjong_tiles[index];
+        for (var i = 1; i <= 4; i++) {
+          tileStack[index+"_"+i] = createTile(PIXI.loader.resources.mahjongTiles.texture, new PIXI.Rectangle(value.x, value.y, value.width, value.height), index+"_"+i);
+        }
+      }
+    }
+
+    function handSort(a, b) {
+      console.log(a.name);
+      console.log(b.name);
+      if(a.name > b.name){
+        return 1;
+      }
+      if(a.name < b.name){
+        return -1;
+      }
+    }
+
+  </script>
 </body>
 </html>

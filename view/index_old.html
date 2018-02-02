@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="cache-control" content="no-cache"/>
+    <title>Index</title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            //TODO: get room URL
+            var conn;
+            var command = $("#command");
+            var log = $("#log");
+            //var name = window.prompt("Your name");
+            var name = "pName";
+            var host = "{{.Host}}";
+            if (window["WebSocket"]) {//supported device list?
+                roomURL = window.location.href.substring(window.location.href.indexOf(host) + host.length + 5); //rewrite it
+                console.log(roomURL);
+                conn = new WebSocket("ws://" + host + "/ws?room=" + roomURL + "&name=" + name);
+                conn.onopen = function () {
+                    console.log("Connected");
+                };
+                conn.onclose = function (evt) {
+                    console.log("Connection closed");
+                };
+                conn.onmessage = function (evt) {
+                    //parse data to JSON
+                    var message = JSON.parse(evt.data);
+                    console.log("Parsed");
+                    switch (message.status) {
+                        case "start":
+                            console.log("start");
+                            log.val(log.val() + '\n' + "game started");
+                            break;
+                        case "stop":
+                            console.log("stop");
+                            log.val(log.val() + '\n' + "game finished");
+                            break;
+                        case "game":
+                            console.log(evt.data);
+                            /*message.body.wall.forEach(function (value) {
+                                $("#wall").append("<li>"+value+"</li>");
+                            });
+                            message.body.reserve.forEach(function (value) {
+                                $("#reserve").append("<li>"+value+"</li>");
+                            });*/
+                            var me = message.body.players["100"];
+                            $("#hand").html("");
+                            me.hand.forEach(function (value) {
+                                $("#hand").append('<li><button class="tile">' + value + '</button></li>');
+                            });
+                            if (me.discard != null) {
+                                $("#discard").html("");
+                                me.discard.forEach(function (value) {
+                                    $("#discard").append('<li><span>' + value + '</span></li>');
+                                });
+                            }
+                            $("#current_tile").text(me.current_tile);
+
+                            log.val(log.val() + '\n' + "game statement updated");
+                            break;
+                        case "message":
+                            console.log("message");
+                            log.val(log.val() + '\n' + message.body);
+                            break;
+                        case "players":
+                            $("#players_list").html(message.body);
+                            message.body.forEach(function (value, index) {
+                                $("table tr").eq(index + 1).find("td:nth-child(1)").append(value);
+                            });
+                            break;
+                        default:
+                            console.log("Parsing error");
+                            log.val(log.val() + '\n' + evt.data);
+                    }
+                }
+            } else {
+                window.alert("Sorry, your device does not supported");
+            }
+            $("#send_message").click(function () {
+                var wsMessage = {status: "message", body: $("#message").val()};
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
+            $("#send_command").click(function () {
+                var turn = {
+                    status: "discard",
+                    meld: "",
+                    tiles: [command.val()]
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
+            // just for tests
+            $("#go").click(function () {
+                var turn = {
+                    status: "skip",
+                    meld: "",
+                    tiles: []
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
+            $("#announce").click(function () {
+                var turn = {
+                    status: "announce",
+                    meld: "",
+                    tiles: []
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
+            $("body").on("click", ".tile", function () {
+                var turn = {
+                    status: "discard",
+                    meld: "",
+                    tiles: [$(this).text()]
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+            });
+        });
+    </script>
+</head>
+<body>
+
+<h1>Hello</h1>
+<p>Room name: {{.RoomName}}</p>
+<p>Players number: {{.Players}}</p>
+
+<input type="text" id="command" name="command" value="">
+<button id="send_command">Send</button>
+
+<br/>
+
+<input type="text" id="message" name="message" value="">
+<button id="send_message">Send message</button>
+
+<br>
+
+<textarea id="log" rows="10" cols="50"></textarea>
+<h3>Players List:</h3>
+<ul id="players_list">
+</ul>
+
+<button id="go">Skip</button>
+<button id="announce">Announce</button>
+<br>
+
+<h3>Current tile:</h3><br>
+<button id="current_tile" class="tile"></button>
+
+<br>
+
+<h3>My hand:</h3>
+<ul id="hand"></ul>
+
+<h3>discard:</h3>
+<ul id="discard"></ul>
+
+<h3>Wall:</h3>
+<ul id="wall"></ul>
+<h3>Reserve:</h3>
+<ul id="reserve"></ul>
+</body>
+</html>
