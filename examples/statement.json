@@ -23,7 +23,7 @@
         "current_tile": "",
         "wind": 0
       },
-      "me": {
+      "100": {
         "hand": [
           "2_1_3",
           "3_7_1",
@@ -39,9 +39,13 @@
           "2_9_3",
           "3_8_3"
         ],
-        "discard": null,
+        "discard": [
+          "2_1_3",
+          "3_7_1",
+          "2_6_2"
+        ],
         "open": null,
-        "current_tile": "",
+        "current_tile": "1_1_1",
         "wind": 0
       }
     },

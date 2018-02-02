@@ -32,7 +32,7 @@ func newRoom() *room {
 	east := randomEast()
 
 	statement := &statement{
-		Players: make(map[int]playerStatement, 4),
+		Players: make(map[int]*playerStatement, 4),
 		Reserve: reserve,
 		East:    east,
 		Wind:    1,    //East = 1
@@ -43,7 +43,7 @@ func newRoom() *room {
 		var hand []string
 		wall, hand = generateHand(wall)
 		pStatement := playerStatement{Hand: hand}
-		statement.Players[i] = pStatement
+		statement.Players[i] = &pStatement
 		//TODO: add wind
 	}
 
@@ -123,7 +123,7 @@ func (r *room) run() {
 // need factory?
 func (r *room) updateAllPlayers() {
 	for i, p := range r.players {
-		p.sendStatement(r.statement.statementByPlayerNumber(i))
+		p.sendStatement(r.statement.statementByPlayerNumber(i + 1))
 	}
 }
 
@@ -180,13 +180,14 @@ func generateHand(w []string) (wall, hand []string) {
 }
 
 func randomEast() int {
-	return rand.Intn(4) + 1 // 1-4, not 0-3
+	//return rand.Intn(4) + 1 // 1-4, not 0-3
+	return 1
 }
 
-func (s statement) statementByPlayerNumber(playerNumber int) statement {
+func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 	// filter statement for selected playerConn (remove foreign hands, the wall and thr reserve)
-	privateStatement := statement{
-		Players: make(map[int]playerStatement, 4),
+	privateStatement := &statement{
+		Players: make(map[int]*playerStatement, 4),
 		Step:    s.Step,
 		Wind:    s.Wind,
 		East:    s.East,
@@ -194,15 +195,15 @@ func (s statement) statementByPlayerNumber(playerNumber int) statement {
 
 	for j, player := range s.Players {
 		if j == playerNumber {
-			privateStatement.Players[j] = player
+			privateStatement.Players[100] = player
 		} else {
-			privateStatement.Players[j] = playerStatement{
-				Open:    player.Open,
-				Discard: player.Discard,
-			}
+			//privateStatement.Players[j] = playerStatement{
+			//	Open:    player.Open,
+			//	Discard: player.Discard,
+			//}
+			privateStatement.Players[j] = player
 		}
 	}
-
 	return privateStatement
 }
 

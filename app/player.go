@@ -14,7 +14,7 @@ type playerConn struct {
 	r      *room
 }
 
-func (p *playerConn) sendStatement(s statement) {
+func (p *playerConn) sendStatement(s *statement) {
 	p.wsMessage(gameType, s) //TODO: send full game statement
 }
 
@@ -57,7 +57,7 @@ func (p *playerConn) receiver() {
 			p.r.message <- request
 		case gameType:
 			//TODO: update statement
-			processStatement(buf.Body)
+			p.r.statement.processStatement(p.number, buf.Body)
 			p.r.updateAll <- struct{}{}
 		default:
 			p.r.updateAll <- struct{}{}
