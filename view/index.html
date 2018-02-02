@@ -114,6 +114,20 @@
                 conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
                 command.val("");
             });
+            $("#announce").click(function () {
+                var turn = {
+                    status: "announce",
+                    meld: "",
+                    tiles: []
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
             $("body").on("click", ".tile", function () {
                 var turn = {
                     status: "discard",
@@ -152,6 +166,7 @@
 </ul>
 
 <button id="go">Skip</button>
+<button id="announce">Announce</button>
 <br>
 
 <h3>Current tile:</h3><br>

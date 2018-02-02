@@ -21,6 +21,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}) {
 	case skipCommand:
 		// skip timer after 3 skips
 	case announceCommand:
+		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
+		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, []string{lastTile})
+		s.Step = playerNumber
 	case discardCommand:
 		if s.Step != playerNumber {
 			logger.Warning("Wrong player number")
@@ -69,4 +72,12 @@ func (h hand) cutTile(tile string) {
 func (s *statement) nextTurn() {
 	s.Step = (s.Step % 4) + 1
 	s.getFromWall()
+}
+
+func (s *statement) prevTurn() int {
+	return (s.Step+4)%4 - 1
+}
+
+func (s *statement) lastTile() string {
+	return s.Players[s.prevTurn()].Discard[:1][0]
 }
