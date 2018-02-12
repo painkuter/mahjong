@@ -18,6 +18,8 @@ type room struct {
 
 	// update statement for all players
 	updateAll chan struct{}
+	// timer
+	timer chan struct{}
 	// game chat message
 	message chan string
 	// stop chanel
@@ -109,6 +111,8 @@ func (r *room) run() {
 	// waiting for some changes
 	for {
 		select {
+		case <- r.timer:
+			r.statement.nextTurn()
 		case <-r.updateAll:
 			r.updateAllPlayers()
 		case pNumber := <-r.stop:

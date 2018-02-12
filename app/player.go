@@ -57,7 +57,7 @@ func (p *playerConn) receiver() {
 			p.r.message <- request
 		case gameType:
 			//TODO: update statement
-			p.r.statement.processStatement(p.number, buf.Body)
+			p.r.statement.processStatement(p.number, buf.Body, p.r.timer)
 			p.r.updateAll <- struct{}{}
 		default:
 			p.r.updateAll <- struct{}{}
@@ -72,4 +72,9 @@ func (p *playerConn) wsMessage(s string, b interface{}) {
 		logger.Error(err)
 	}
 	p.ws.WriteMessage(websocket.TextMessage, text)
+}
+
+// TODO: handle player error
+func (p *playerConn) playerError (){
+	// player send wrong data -> auto defeat, disconnect
 }

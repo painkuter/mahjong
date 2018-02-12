@@ -9,11 +9,12 @@ type wsMessage struct {
 
 type statement struct {
 	Players map[int]*playerStatement `json:"players"`
-	Wall    hand                    `json:"wall"`
-	East    int                     `json:"east"` //east-player number (1-4)
-	Wind    int                     `json:"wind"` //wind of round (changing after 4 rounds)
-	Step    int                     `json:"step"` //current player number
-	Reserve hand                    `json:"reserve"`
+	Wall    hand                     `json:"wall"`
+	East    int                      `json:"east"` //east-player number (1-4)
+	Wind    int                      `json:"wind"` //wind of round (changing after 4 rounds)
+	Step    int                      `json:"step"` //current player number
+	Reserve hand                     `json:"reserve"`
+	Pass    pass                     `json:"-"`
 }
 
 type playerStatement struct {
@@ -23,10 +24,13 @@ type playerStatement struct {
 	Open        []hand `json:"open"`         // [public]
 	Wind        int    `json:"wind"`         // [public]
 }
+
 type playerCommand struct {
 	Status string `json:"status"` // skip / discard / announce
 	Meld   string `json:"meld"`   // chow / pong / kong
 	Tiles  hand   `json:"tiles"`
 }
+
+type pass map[int]bool
 
 type hand []string

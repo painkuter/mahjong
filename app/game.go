@@ -7,7 +7,7 @@ import (
 
 //TODO: process game here
 
-func (s *statement) processStatement(playerNumber int, command interface{}) {
+func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) {
 	var c playerCommand
 	err := ms.Decode(command, &c)
 	if err != nil {
@@ -19,7 +19,12 @@ func (s *statement) processStatement(playerNumber int, command interface{}) {
 
 	switch c.Status {
 	case skipCommand:
-		// skip timer after 3 skips
+		// skip timer after 4 skips
+		s.Pass[playerNumber] = true
+		if s.Pass.checkSkip(){
+			// pass timer
+			timer <- struct{}{}
+		}
 	case announceCommand:
 		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
 		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, []string{lastTile})
@@ -48,7 +53,8 @@ func (s *statement) processStatement(playerNumber int, command interface{}) {
 		// timer for announce
 		s.nextTurn()
 	default:
-		//TODO: handle error
+		logger.Error("Wrong client command")
+		// TODO: finish with player's error
 	}
 }
 
@@ -58,6 +64,7 @@ func (s *statement) getFromWall() {
 	s.Wall = s.Wall[1:]
 }
 
+// removes tile from the hand
 func (h hand) cutTile(tile string) {
 	for i, elem := range h {
 		if tile == elem {
@@ -69,15 +76,27 @@ func (h hand) cutTile(tile string) {
 	logger.Warning("Tile not found")
 }
 
+// move turn to hte next player
 func (s *statement) nextTurn() {
 	s.Step = (s.Step % 4) + 1
 	s.getFromWall()
 }
 
+// returns last player's number
 func (s *statement) prevTurn() int {
 	return (s.Step+4)%4 - 1
 }
 
+// returns last tile name
 func (s *statement) lastTile() string {
 	return s.Players[s.prevTurn()].Discard[:1][0]
+}
+
+func (p pass) checkSkip() bool {
+	for _, el := range p {
+		if !el {
+			return false
+		}
+	}
+	return true
 }
