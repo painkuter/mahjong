@@ -27,7 +27,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	var homeTempl = template.Must(template.ParseFiles("view/index.html"))
+	var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
 	data := struct {
 		Host     string
 		RoomName string

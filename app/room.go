@@ -116,8 +116,8 @@ func (r *room) run() {
 		case <-r.updateAll:
 			r.updateAllPlayers()
 		case pNumber := <-r.stop:
-			logger.Info("Player #" + strconv.Itoa(pNumber) + " stopped the game")
-			r.stopAllPlayers()
+			logger.Infof("Player #%v stopped the game", pNumber)
+			r.stopAllPlayers(pNumber)
 		case pMessage := <-r.message:
 			r.sendMessageToAllPlayers(pMessage)
 		}
@@ -131,9 +131,9 @@ func (r *room) updateAllPlayers() {
 	}
 }
 
-func (r *room) stopAllPlayers() {
+func (r *room) stopAllPlayers(pNumber int) {
 	for _, p := range r.players {
-		p.stop()
+		p.stop(pNumber)
 	}
 }
 

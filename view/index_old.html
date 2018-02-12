@@ -36,7 +36,7 @@
                             break;
                         case "stop":
                             console.log("stop");
-                            log.val(log.val() + '\n' + "game finished");
+                            log.val(log.val() + '\n' + "player " + message.body + " gave up");
                             break;
                         case "game":
                             console.log(evt.data);
@@ -141,6 +141,13 @@
                 console.log(JSON.stringify(wsMessage));
                 conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
             });
+            $("#give_up").click(function () {
+                var wsMessage = {
+                    status: "stop"
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+            });
         });
     </script>
 </head>
@@ -184,5 +191,9 @@
 <ul id="wall"></ul>
 <h3>Reserve:</h3>
 <ul id="reserve"></ul>
+
+<br>
+<button id="give_up">give up</button>
+
 </body>
 </html>

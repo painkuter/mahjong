@@ -27,13 +27,14 @@ func (p *playerConn) start() {
 	p.wsMessage(startType, "start")
 }
 
-func (p *playerConn) stop() {
-	p.wsMessage(stopType, "stop")
+func (p *playerConn) stop(pNumber int) {
+	p.wsMessage(stopType, pNumber)
 	p.ws.WriteMessage(websocket.CloseMessage, []byte{})
 }
 
 func (p *playerConn) receiver() {
 	logger.Info("Listening for playerConn " + p.name)
+	defer p.ws.Close()
 	for {
 		_, message, err := p.ws.ReadMessage()
 		if err != nil {
@@ -55,6 +56,10 @@ func (p *playerConn) receiver() {
 				continue
 			}
 			p.r.message <- request
+		case stopType:
+			p.r.stop <- p.number
+			logger.Infof("Player %v gave up", p.number)
+			//return
 		case gameType:
 			//TODO: update statement
 			p.r.statement.processStatement(p.number, buf.Body, p.r.timer)
@@ -63,7 +68,6 @@ func (p *playerConn) receiver() {
 			p.r.updateAll <- struct{}{}
 		}
 	}
-	p.ws.Close()
 }
 
 func (p *playerConn) wsMessage(s string, b interface{}) {
