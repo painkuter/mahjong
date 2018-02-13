@@ -21,7 +21,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 	case skipCommand:
 		// skip timer after 4 skips
 		s.Pass[playerNumber] = true
-		if s.Pass.checkSkip(){
+		if s.Pass.checkSkip() {
 			// pass timer
 			timer <- struct{}{}
 		}
@@ -99,4 +99,17 @@ func (p pass) checkSkip() bool {
 		}
 	}
 	return true
+}
+
+func (h hand) findPong(a, b, c string) bool {
+	if !((a[:4] == b[:4]) && (b[:4] == c[:4])) {
+		return false
+	}
+	count := 0
+	for _, el := range h {
+		if (el == a) || (el == b) || (el == c) {
+			count++
+		}
+	}
+	return count == 3
 }
