@@ -3,7 +3,8 @@ package app
 const (
 	// Server
 	ADDR = ":8079"
-	logFile = "logs/log_"
+	logDir = "logs"
+	logPrefix = "log_"
 	timeout = 60*60*1000
 	announceTime = 10*1000 // 10 sec to announce meld
 	turnTime = 60*1000 // 1 minute for the turn
