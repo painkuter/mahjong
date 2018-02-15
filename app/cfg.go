@@ -27,4 +27,10 @@ const (
 	skipCommand = "skip"
 	discardCommand = "discard"
 	announceCommand = "announce"
+	pigHandCommand = "pig_hand"
+	// meld types
+	chowType = "chow"
+	pongType = "pong"
+	kongType = "kong"
+	mahjongType = "mahjong"
 )

@@ -37,6 +37,8 @@
         * Pong [pong]
         * Kong [kong]
             * get tail from reserve
+        * Mahjong [mahjong]
+    * announce ready hand
         
 * update players list [players]
 * message [message] //just text message

@@ -1,8 +1,6 @@
 package app
 
 import (
-	"strconv"
-
 	"github.com/google/logger"
 	ms "github.com/mitchellh/mapstructure"
 )
@@ -29,7 +27,36 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		}
 	case announceCommand:
 		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
-		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, []string{lastTile})
+		//remove last tile from discard
+		s.Players[s.prevTurn()].Discard.cutTile(lastTile)
+
+		//append last tile to the hand
+		extendedHand := append(s.Players[playerNumber].Hand, lastTile)
+
+		switch c.Meld {
+		case chowType:
+			if playerNumber != (s.prevTurn()%4)+1 {
+				// TODO: return error
+				return
+			}
+			extendedHand.findChow(c.Tiles)
+		case pongType:
+			extendedHand.findPong(c.Tiles)
+		case kongType:
+			extendedHand.findKong(c.Tiles)
+		case mahjongType:
+			if !s.Players[playerNumber].IsReady {
+				// TODO: return error: hand isn't ready
+				return
+			}
+			//TODO: finish game, sand full statement
+			logger.Infoln("MAHJONG!!!")
+		}
+
+		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, c.Tiles)
+		for _, tile := range c.Tiles {
+			s.Players[playerNumber].Hand.cutTile(tile)
+		}
 		s.Step = playerNumber
 	case discardCommand:
 		if s.Step != playerNumber {
@@ -54,6 +81,10 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		p.Discard = append(p.Discard, c.Tiles[0])
 		// timer for announce
 		s.nextTurn()
+	case pigHandCommand:
+		s.Players[playerNumber].IsReady = true
+		//TODO: announce to all players
+		logger.Infoln("Pig hand!")
 	default:
 		logger.Error("Wrong client command")
 		// TODO: finish with player's error
@@ -101,77 +132,4 @@ func (p pass) checkSkip() bool {
 		}
 	}
 	return true
-}
-
-func (h hand) findPong(pong []string) bool {
-	if !(len(pong) == 3) {
-		return false
-	}
-	if !((pong[0][:4] == pong[1][:4]) && (pong[1][:4] == pong[2][:4])) {
-		return false
-	}
-	count := 0
-	for _, el := range h {
-		if (el == pong[0]) || (el == pong[1]) || (el == pong[2]) {
-			count++
-		}
-	}
-	return count == 3
-}
-
-func (h hand) findKong(kong []string) bool {
-	if !(len(kong) == 4) {
-		return false
-	}
-	if !((kong[0][:4] == kong[1][:4]) && (kong[1][:4] == kong[2][:4]) && (kong[2][:4] == kong[3][:4])) {
-		return false
-	}
-	count := 0
-	for _, el := range h {
-		if (el == kong[0]) || (el == kong[1]) || (el == kong[2]) || (el == kong[3]) {
-			count++
-		}
-	}
-	return count == 4
-}
-
-func (h hand) findChow(chow []string) bool {
-	if !(len(chow) == 3) {
-		return false
-	}
-	if !((chow[0][0] == chow[1][0]) && (chow[1][0] == chow[2][0])) {
-		return false
-	}
-
-	a, err := strconv.ParseInt(chow[0][2:3], 10, 64)
-	check(err)
-	b, err := strconv.ParseInt(chow[1][2:3], 10, 64)
-	check(err)
-	c, err := strconv.ParseInt(chow[2][2:3], 10, 64)
-	check(err)
-
-	if a > b {
-		a, b = b, a
-	}
-	if a > c {
-		a, c = c, a
-	}
-
-	// a is min
-	expectSum := a*2 + 1 + 2
-	sum := b + c
-
-	if expectSum != sum {
-		return false
-	}
-
-	//math.Abs(a - b) +math.Abs(a-c)+math.Abs(b-c)==4 && a!=b && b!=c && a!=c
-
-	count := 0
-	for _, el := range h {
-		if (el == chow[0]) || (el == chow[1]) || (el == chow[2]) {
-			count++
-		}
-	}
-	return count == 3
 }
