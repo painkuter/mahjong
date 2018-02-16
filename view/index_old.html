@@ -49,7 +49,7 @@
                             var me = message.body.players["100"];
                             $("#hand").html("");
                             me.hand.forEach(function (value) {
-                                $("#hand").append('<li><button class="tile">' + value + '</button></li>');
+                                $("#hand").append('<li><input type="checkbox"><button class="tile">' + value + '</button></li>');
                             });
                             if (me.discard != null) {
                                 $("#discard").html("");
@@ -57,6 +57,14 @@
                                     $("#discard").append('<li><span>' + value + '</span></li>');
                                 });
                             }
+
+                            if (me.open != null) {
+                                $("#open").html("");
+                                me.open.forEach(function (value) {
+                                    $("#open").append('<li><span>' + value + '</span></li>');
+                                });
+                            }
+
                             $("#current_tile").text(me.current_tile);
 
                             log.val(log.val() + '\n' + "game statement updated");
@@ -114,7 +122,26 @@
                 conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
                 command.val("");
             });
-            $("#announce").click(function () {
+            $("#announce_chow").click(function () {
+                var tiles = [];
+                $("input[type=checkbox]:checked").each(function (value) {
+                    //console.log($(this).next().text());
+                    tiles.push($(this).next().text());
+                });
+                var turn = {
+                    status: "announce",
+                    meld: "chow",
+                    tiles: tiles
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
+            $("#announce_pong").click(function () {
                 var turn = {
                     status: "announce",
                     meld: "",
@@ -173,7 +200,11 @@
 </ul>
 
 <button id="go">Skip</button>
-<button id="announce">Announce</button>
+<button id="announce_chow">Announce Chow</button>
+<button id="announce_pong">Announce Pong</button>
+<button id="announce_kong">Announce Kong</button>
+<button id="announce_pig_hand">Announce Pig Hand</button>
+<button id="announce_mahjong">Announce Mahjong</button>
 <br>
 
 <h3>Current tile:</h3><br>
@@ -184,8 +215,11 @@
 <h3>My hand:</h3>
 <ul id="hand"></ul>
 
-<h3>discard:</h3>
+<h3>Discard:</h3>
 <ul id="discard"></ul>
+
+<h3>Open:</h3>
+<ul id="open"></ul>
 
 <h3>Wall:</h3>
 <ul id="wall"></ul>

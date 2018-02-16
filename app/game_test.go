@@ -39,3 +39,9 @@ func TestFindKong_NotFound(t *testing.T) {
 	h := hand{"1_1_1", "1_2_3", "1_1_3", "1_1_4"}
 	assert.Equal(t, h.findKong([]string{a, b, c, d}), false)
 }
+
+func TestCutTile(t *testing.T) {
+	h := hand{"1_1_1", "1_9_3", "1_2_3", "1_1_3", "1_1_4"}
+	h.cutTile("1_9_3")
+	assert.Equal(t, h, hand{"1_1_1", "1_2_3", "1_1_3", "1_1_4"})
+}

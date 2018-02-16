@@ -26,6 +26,10 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 			timer <- struct{}{}
 		}
 	case announceCommand:
+		if len(s.Players[s.prevTurn()].Discard) == 0 {
+			logger.Warning("Empty discard")
+			return
+		}
 		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
 		//remove last tile from discard
 		s.Players[s.prevTurn()].Discard.cutTile(lastTile)
@@ -33,17 +37,19 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		//append last tile to the hand
 		extendedHand := append(s.Players[playerNumber].Hand, lastTile)
 
+		ok := false
 		switch c.Meld {
 		case chowType:
 			if playerNumber != (s.prevTurn()%4)+1 {
 				// TODO: return error
+				logger.Warning("Wrong turn for chow")
 				return
 			}
-			extendedHand.findChow(c.Tiles)
+			ok = extendedHand.findChow(c.Tiles)
 		case pongType:
-			extendedHand.findPong(c.Tiles)
+			ok = extendedHand.findPong(c.Tiles)
 		case kongType:
-			extendedHand.findKong(c.Tiles)
+			ok = extendedHand.findKong(c.Tiles)
 		case mahjongType:
 			if !s.Players[playerNumber].IsReady {
 				// TODO: return error: hand isn't ready
@@ -51,6 +57,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 			}
 			//TODO: finish game, sand full statement
 			logger.Infoln("MAHJONG!!!")
+		}
+		if !ok {
+			return
 		}
 
 		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, c.Tiles)
@@ -98,10 +107,10 @@ func (s *statement) getFromWall() {
 }
 
 // removes tile from the hand
-func (h hand) cutTile(tile string) {
-	for i, elem := range h {
+func (h *hand) cutTile(tile string) {
+	for i, elem := range *h {
 		if tile == elem {
-			h = append(h[:i], h[i+1:]...)
+			*h = append((*h)[:i], (*h)[i+1:]...)
 			return
 		}
 	}

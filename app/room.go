@@ -144,12 +144,13 @@ func (r *room) sendMessageToAllPlayers(message string) {
 }
 
 func randomizeWall(wall []string) []string {
-	list := rand.Perm(wallSize)
+/*	list := rand.Perm(wallSize)
 	w := make([]string, wallSize)
 	for i, _ := range wall {
 		w[i] = wall[list[i]]
 	}
-	return w
+	return w*/
+	return wall
 }
 
 func generateWall() []string {
