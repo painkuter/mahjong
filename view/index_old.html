@@ -125,7 +125,6 @@
             $("#announce_chow").click(function () {
                 var tiles = [];
                 $("input[type=checkbox]:checked").each(function (value) {
-                    //console.log($(this).next().text());
                     tiles.push($(this).next().text());
                 });
                 var turn = {
@@ -142,10 +141,32 @@
                 command.val("");
             });
             $("#announce_pong").click(function () {
+                var tiles = [];
+                $("input[type=checkbox]:checked").each(function (value) {
+                    tiles.push($(this).next().text());
+                });
                 var turn = {
                     status: "announce",
-                    meld: "",
-                    tiles: []
+                    meld: "pong",
+                    tiles: tiles
+                };
+                var wsMessage = {
+                    status: "game",
+                    body: turn
+                };
+                console.log(JSON.stringify(wsMessage));
+                conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
+                command.val("");
+            });
+            $("#announce_kong").click(function () {
+                var tiles = [];
+                $("input[type=checkbox]:checked").each(function (value) {
+                    tiles.push($(this).next().text());
+                });
+                var turn = {
+                    status: "announce",
+                    meld: "kong",
+                    tiles: tiles
                 };
                 var wsMessage = {
                     status: "game",

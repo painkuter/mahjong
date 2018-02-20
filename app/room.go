@@ -42,9 +42,9 @@ func newRoom() *room {
 	}
 	// Fill players statements
 	for i := 1; i <= 4; i++ {
-		var hand []string
-		wall, hand = generateHand(wall)
-		pStatement := playerStatement{Hand: hand}
+		var h hand
+		wall, h = generateHand(wall)
+		pStatement := playerStatement{Hand: h}
 		statement.Players[i] = &pStatement
 		//TODO: add wind
 	}
@@ -111,7 +111,7 @@ func (r *room) run() {
 	// waiting for some changes
 	for {
 		select {
-		case <- r.timer:
+		case <-r.timer:
 			r.statement.nextTurn()
 		case <-r.updateAll:
 			r.updateAllPlayers()
@@ -144,12 +144,12 @@ func (r *room) sendMessageToAllPlayers(message string) {
 }
 
 func randomizeWall(wall []string) []string {
-/*	list := rand.Perm(wallSize)
-	w := make([]string, wallSize)
-	for i, _ := range wall {
-		w[i] = wall[list[i]]
-	}
-	return w*/
+	/*	list := rand.Perm(wallSize)
+		w := make([]string, wallSize)
+		for i, _ := range wall {
+			w[i] = wall[list[i]]
+		}
+		return w*/
 	return wall
 }
 
@@ -180,8 +180,10 @@ func generateReserve(w []string) (wall, reserve []string) {
 	return w[reserveSize:], w[:reserveSize]
 }
 
-func generateHand(w []string) (wall, hand []string) {
-	return w[handSize:], w[:handSize]
+func generateHand(w []string) (wall, h hand) {
+	h = make(hand,handSize)
+	copy(h, w[:handSize])
+	return w[handSize:], h
 }
 
 func randomEast() int {
@@ -190,7 +192,7 @@ func randomEast() int {
 }
 
 func (s statement) statementByPlayerNumber(playerNumber int) *statement {
-	// filter statement for selected playerConn (remove foreign hands, the wall and thr reserve)
+	// filter statement for selected playerConn (remove foreign hands, the wall and the reserve)
 	privateStatement := &statement{
 		Players: make(map[int]*playerStatement, 4),
 		Step:    s.Step,

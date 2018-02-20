@@ -24,10 +24,10 @@ const (
 	stopType = "stop"
 
 	//game commands:
-	skipCommand = "skip"
-	discardCommand = "discard"
-	announceCommand = "announce"
-	pigHandCommand = "pig_hand"
+	skipCommand      = "skip"
+	discardCommand   = "discard"
+	announceCommand  = "announce"
+	readyHandCommand = "ready_hand"
 	// meld types
 	chowType = "chow"
 	pongType = "pong"

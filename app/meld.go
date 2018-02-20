@@ -1,6 +1,8 @@
 package app
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func (h hand) findPong(pong []string) bool {
 	if !(len(pong) == 3) {
@@ -59,7 +61,6 @@ func (h hand) findChow(chow []string) bool {
 	// a is min
 	expectSum := a*2 + 1 + 2
 	sum := b + c
-
 	if expectSum != sum {
 		return false
 	}

@@ -35,8 +35,8 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		s.Players[s.prevTurn()].Discard.cutTile(lastTile)
 
 		//append last tile to the hand
-		extendedHand := append(s.Players[playerNumber].Hand, lastTile)
-
+		h := s.Players[playerNumber].Hand
+		c.Tiles = append(c.Tiles, lastTile)
 		ok := false
 		switch c.Meld {
 		case chowType:
@@ -45,11 +45,11 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 				logger.Warning("Wrong turn for chow")
 				return
 			}
-			ok = extendedHand.findChow(c.Tiles)
+			ok = h.findChow(c.Tiles)
 		case pongType:
-			ok = extendedHand.findPong(c.Tiles)
+			ok = h.findPong(c.Tiles)
 		case kongType:
-			ok = extendedHand.findKong(c.Tiles)
+			ok = h.findKong(c.Tiles)
 		case mahjongType:
 			if !s.Players[playerNumber].IsReady {
 				// TODO: return error: hand isn't ready
@@ -90,10 +90,10 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		p.Discard = append(p.Discard, c.Tiles[0])
 		// timer for announce
 		s.nextTurn()
-	case pigHandCommand:
+	case readyHandCommand:
 		s.Players[playerNumber].IsReady = true
 		//TODO: announce to all players
-		logger.Infoln("Pig hand!")
+		logger.Infoln("Ready hand!")
 	default:
 		logger.Error("Wrong client command")
 		// TODO: finish with player's error
@@ -110,7 +110,7 @@ func (s *statement) getFromWall() {
 func (h *hand) cutTile(tile string) {
 	for i, elem := range *h {
 		if tile == elem {
-			*h = append((*h)[:i], (*h)[i+1:]...)
+			*h = append((*h)[:i], (*h)[i+1:]...) //TODO: fix pointers
 			return
 		}
 	}
