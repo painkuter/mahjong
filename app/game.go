@@ -45,11 +45,11 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 				logger.Warning("Wrong turn for chow")
 				return
 			}
-			ok = h.findChow(c.Tiles)
+			ok = h.checkChow(c.Tiles)
 		case pongType:
-			ok = h.findPong(c.Tiles)
+			ok = h.checkPong(c.Tiles)
 		case kongType:
-			ok = h.findKong(c.Tiles)
+			ok = h.checkKong(c.Tiles)
 		case mahjongType:
 			if !s.Players[playerNumber].IsReady {
 				// TODO: return error: hand isn't ready

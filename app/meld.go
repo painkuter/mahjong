@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-func (h hand) findPong(pong []string) bool {
+func (h hand) checkPong(pong []string) bool {
 	if !(len(pong) == 3) {
 		return false
 	}
@@ -20,7 +20,7 @@ func (h hand) findPong(pong []string) bool {
 	return count == 3
 }
 
-func (h hand) findKong(kong []string) bool {
+func (h hand) checkKong(kong []string) bool {
 	if !(len(kong) == 4) {
 		return false
 	}
@@ -36,7 +36,7 @@ func (h hand) findKong(kong []string) bool {
 	return count == 4
 }
 
-func (h hand) findChow(chow []string) bool {
+func (h hand) checkChow(chow []string) bool {
 	if !(len(chow) == 3) {
 		return false
 	}
@@ -76,7 +76,7 @@ func (h hand) findChow(chow []string) bool {
 	return count == 3
 }
 
-func (h hand) findMahjong(mahjong [][]string) bool {
+func (h hand) checkMahjong(mahjong [][]string) bool {
 
 	return true
 }

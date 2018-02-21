@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
@@ -81,4 +82,8 @@ func (p *playerConn) wsMessage(s string, b interface{}) {
 // TODO: handle player error
 func (p *playerConn) playerError (){
 	// player send wrong data -> auto defeat, disconnect
+}
+
+func (h hand) sortHand()  {
+	sort.Strings(h)
 }

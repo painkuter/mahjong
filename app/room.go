@@ -183,6 +183,7 @@ func generateReserve(w []string) (wall, reserve []string) {
 func generateHand(w []string) (wall, h hand) {
 	h = make(hand,handSize)
 	copy(h, w[:handSize])
+	h.sortHand()
 	return w[handSize:], h
 }
 
