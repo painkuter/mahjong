@@ -56,3 +56,4 @@
 * separate loggers for dev and prod
 * save last turn
 * remove room from list after player give up
+* monitoring
