@@ -1,10 +1,13 @@
 package main
 
-import "mahjong/app"
+import (
+	"mahjong/app"
+	"mahjong/app/common"
+)
 
 // just starter
 func main() {
-	l := app.InitLogging()
+	l := common.InitLogging()
 	defer l.Close()
 
 	app.Main()

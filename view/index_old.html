@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="cache-control" content="no-cache"/>
     <title>Index</title>
-
+    <style>
+        #your_turn {
+            display: none;
+        }
+    </style>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -64,8 +68,10 @@
                                     $("#open").append('<li><span>' + value + '</span></li>');
                                 });
                             }
-
-                            $("#current_tile").text(me.current_tile);
+                            if (me.current_tile !== "") {
+                                $("#current_tile").text(me.current_tile);
+                                $("#your_turn").show();
+                            } else $("#your_turn").hide();
 
                             log.val(log.val() + '\n' + "game statement updated");
                             break;
@@ -202,7 +208,7 @@
 <body>
 
 <h1>Hello</h1>
-<p>Room name: {{.RoomName}}</p>
+<p>Room name: <a href="/room/{{.RoomName}}">{{.RoomName}}</a></p>
 <p>Players number: {{.Players}}</p>
 
 <input type="text" id="command" name="command" value="">
@@ -227,7 +233,7 @@
 <button id="announce_pig_hand">Announce Pig Hand</button>
 <button id="announce_mahjong">Announce Mahjong</button>
 <br>
-
+<h1 id="your_turn">YOUR TURN</h1>
 <h3>Current tile:</h3><br>
 <button id="current_tile" class="tile"></button>
 

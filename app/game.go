@@ -6,7 +6,7 @@ import (
 )
 
 //TODO: process game here
-
+// processStatement processes players commands
 func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) {
 	var c playerCommand
 	err := ms.Decode(command, &c)
@@ -110,7 +110,7 @@ func (s *statement) getFromWall() {
 func (h *hand) cutTile(tile string) {
 	for i, elem := range *h {
 		if tile == elem {
-			*h = append((*h)[:i], (*h)[i+1:]...) //TODO: fix pointers
+			*h = append((*h)[:i], (*h)[i+1:]...) //we use pointer to slice to avoid problems with capacity
 			return
 		}
 	}
@@ -118,7 +118,7 @@ func (h *hand) cutTile(tile string) {
 	logger.Warning("Tile not found")
 }
 
-// move turn to hte next player
+// move turn to the next player
 func (s *statement) nextTurn() {
 	s.Step = (s.Step % 4) + 1
 	s.getFromWall()

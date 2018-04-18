@@ -143,6 +143,7 @@ func (r *room) sendMessageToAllPlayers(message string) {
 	}
 }
 
+// commented for development
 func randomizeWall(wall []string) []string {
 	/*	list := rand.Perm(wallSize)
 		w := make([]string, wallSize)

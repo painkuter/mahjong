@@ -11,7 +11,7 @@ func TestFindPong(t *testing.T) {
 	b := "1_1_2"
 	c := "1_1_3"
 	h := hand{"1_1_1", "1_2_3", "1_1_2", "1_1_3"}
-	assert.Equal(t, h.checkPong([]string{a, b, c}), true)
+	assert.Equal(t, true, h.checkPong([]string{a, b, c}))
 }
 
 func TestFindPong_NotFound(t *testing.T) {
@@ -19,7 +19,7 @@ func TestFindPong_NotFound(t *testing.T) {
 	b := "1_1_2"
 	c := "1_1_3"
 	h := hand{"1_1_1", "1_2_3", "1_1_3"}
-	assert.Equal(t, h.checkPong([]string{a, b, c}), false)
+	assert.Equal(t, false, h.checkPong([]string{a, b, c}))
 }
 
 func TestFindKong(t *testing.T) {
@@ -28,7 +28,7 @@ func TestFindKong(t *testing.T) {
 	c := "1_1_3"
 	d := "1_1_4"
 	h := hand{"1_1_1", "1_2_3", "1_1_2", "1_1_3", "1_1_4"}
-	assert.Equal(t, h.checkKong([]string{a, b, c, d}), true)
+	assert.Equal(t, true, h.checkKong([]string{a, b, c, d}))
 }
 
 func TestFindKong_NotFound(t *testing.T) {
@@ -37,11 +37,11 @@ func TestFindKong_NotFound(t *testing.T) {
 	c := "1_1_3"
 	d := "1_1_4"
 	h := hand{"1_1_1", "1_2_3", "1_1_3", "1_1_4"}
-	assert.Equal(t, h.checkKong([]string{a, b, c, d}), false)
+	assert.Equal(t, false, h.checkKong([]string{a, b, c, d}))
 }
 
 func TestCutTile(t *testing.T) {
 	h := hand{"1_1_1", "1_9_3", "1_2_3", "1_1_3", "1_1_4"}
 	h.cutTile("1_9_3")
-	assert.Equal(t, h, hand{"1_1_1", "1_2_3", "1_1_3", "1_1_4"})
+	assert.Equal(t, hand{"1_1_1", "1_2_3", "1_1_3", "1_1_4"}, h)
 }

@@ -1,22 +1,23 @@
 # Mahjong
 
-### Installation
+#### Installation
     curl https://glide.sh/get | sh
     glide install
+    docker-compose up
 
-### Run
+#### Run
     go run main.go
     
-### Links
+#### Links
     /room
     /room/[URL]
     /new-room
     /rooms-list    
     
-### Testing
+#### Testing
     go test ./...
     
-### Statement
+#### Statement
 * player
     * hand
     * dump
@@ -26,7 +27,7 @@
 * step // current player's number
 * reserve // 
 
-### Message list
+#### Message list
 * start game [start]
 * stop game [stop]
 * update statement [game]
@@ -44,16 +45,18 @@
 * update players list [players]
 * message [message] //just text message
 
-### TODO
+#### TODO
+* spectate the room
+* print YOUR TURN +
 * ping-pong players
-* run room in goroutine
+* run room in goroutine +
 * close ws after game
 * makefile
 * save history to DB
 * use cookies for identification 
 * connect to the room by URL
 * error's pages
-* separate loggers for dev and prod
+* separate logger for dev and prod
 * save last turn
 * remove room from list after player give up
 * monitoring

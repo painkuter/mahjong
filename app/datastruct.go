@@ -12,7 +12,7 @@ type statement struct {
 	Wall    hand                     `json:"wall"`
 	East    int                      `json:"east"` //east-player number (1-4)
 	Wind    int                      `json:"wind"` //wind of round (changing after 4 rounds)
-	Step    int                      `json:"step"` //current player number
+	Step    int                      `json:"step"` //current player number (1-4)
 	Reserve hand                     `json:"reserve"`
 	Pass    pass                     `json:"-"`
 }
