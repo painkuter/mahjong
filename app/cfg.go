@@ -2,14 +2,14 @@ package app
 
 const (
 	// Server
-	ADDR = ":8079"
-	logDir = "logs"
-	logPrefix = "log_"
+	ADDR = "0.0.0.0:8079"
+	LogDir = "logs"
+	LogPrefix = "log_"
 	timeout = 60*60*1000
 	announceTime = 10*1000 // 10 sec to announce meld
 	turnTime = 60*1000 // 1 minute for the turn
 	charset   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	urlLength = 8 //room-url length
+	urlLength = 12 //room-url length
 
 	// Game
 	wallSize  = 136

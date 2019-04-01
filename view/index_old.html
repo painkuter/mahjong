@@ -192,6 +192,7 @@
                     status: "game",
                     body: turn
                 };
+                $("#current_tile").text("");
                 console.log(JSON.stringify(wsMessage));
                 conn.send(JSON.stringify(wsMessage)); //mb we can send JSON object?
             });

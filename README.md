@@ -1,15 +1,14 @@
 # Mahjong
 
 #### Installation
-    curl https://glide.sh/get | sh
-    glide install
     docker-compose up
+    go mod tidy
 
 #### Run
     go run main.go
     
 #### Links
-    /room
+    0.0.0.0/room
     /room/[URL]
     /new-room
     /rooms-list    
@@ -30,8 +29,8 @@
 #### Message list
 * start game [start]
 * stop game [stop]
-* update statement [game]
 * error [error]
+* update statement [game]
     * skip announce [skip]
     * move tail to discard [discard]
     * announce combination [announce]

@@ -59,7 +59,7 @@ func newRoom() *room {
 		statement: statement,
 	}
 	logger.Info("New room " + url)
-	activeRooms_[r.url] = r
+	activeRooms[r.url] = r
 	return r
 }
 
