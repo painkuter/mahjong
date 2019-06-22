@@ -36,3 +36,16 @@ type playerCommand struct {
 type pass map[int]bool
 
 type hand []string
+
+type roomResponse struct {
+	Host     string `json:"host"`
+	RoomName string `json:"room_name"`
+	Players  int    `json:"players"`
+}
+
+type gameAction struct {
+	Player int      `json:"player"`
+	Action string   `json:"action"`
+	Meld   string   `json:"meld"`
+	Value  []string `json:"value"`
+}

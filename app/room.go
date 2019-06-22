@@ -68,6 +68,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	if len(r.players) < 4 {
 		p := playerConn{name, len(r.players) + 1, ws, r}
 		r.players = append(r.players, p)
+		//p.wsMessage("s","test")
 
 		// push player to players list:
 		for _, p_ := range r.players {

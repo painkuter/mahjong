@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -28,12 +29,29 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
-	data := struct {
-		Host     string
-		RoomName string
-		Players  int
-	}{r.Host, roomUrl, len(Room.players) + 1}
+	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	homeTempl.Execute(w, data)
+}
+
+func appRoomHandler(w http.ResponseWriter, r *http.Request) {
+	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
+	check(err)
+	if roomUrl == "room" {
+		roomUrl = Room.url
+	} else {
+		if len(roomUrl) != urlLength {
+			logger.Error("Wrong room-url")
+			http.Error(w, "Room not found", 404)
+			return
+		}
+	}
+	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	response, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+	w.Write([]byte(response))
+	w.Header().Set("Content-Type", "application/json")
 }
 
 func roomsListHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,6 +94,7 @@ func Main() {
 	rh := http.RedirectHandler("/room", 301)
 	http.Handle("/", rh)                             // Path to redirect to connect default room
 	http.HandleFunc("/room", roomHandler)            // Path to connect default room
+	http.HandleFunc("/app/room", appRoomHandler)     // Path to connect default room
 	http.HandleFunc("/rooms-list", roomsListHandler) // Rooms list
 	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
 	http.HandleFunc("/new-room", newRoomHandler)     // Path to create new room -> redirecting to /room/[URL]

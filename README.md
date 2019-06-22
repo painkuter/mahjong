@@ -30,7 +30,9 @@
 * start game [start]
 * stop game [stop]
 * error [error]
-* update statement [game]
+* starting statement [statement]
+* update statement [action]
+    * gesture [gesture] просясящая рука
     * skip announce [skip]
     * move tail to discard [discard]
     * announce combination [announce]
@@ -39,7 +41,7 @@
         * Kong [kong]
             * get tail from reserve
         * Mahjong [mahjong]
-    * announce ready hand
+    * announce ready hand [ready]
         
 * update players list [players]
 * message [message] //just text message
@@ -59,3 +61,10 @@
 * save last turn
 * remove room from list after player give up
 * monitoring
+* create DB for statements, games and players saving
+
+Подключение 
+0. /room -> room_name
+0. /ws?room=room_name
+0. После подключения 4х игроков начинается игра - сообщение "start"-type
+0. Пересылка всего состояния - "game"-type

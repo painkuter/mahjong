@@ -17,11 +17,11 @@ const (
 	handSize = 13
 
 	//wsMessage types:
-	gameType  = "game"
-	messageType = "message"
-	playersType = "players"
-	startType   = "start"
-	stopType = "stop"
+	gameType  = "game" // игровые команды
+	messageType = "message" // чат
+	playersType = "players" // добавление игрока в список
+	startType   = "start" // начало игры
+	stopType = "stop" // окончание игры
 
 	//game commands:
 	skipCommand      = "skip"
