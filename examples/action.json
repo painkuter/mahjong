@@ -1,3 +1,5 @@
 {"status":"action", "player":99, "action":"announce","meld":"chow", "value":["3_1_1","3_2_1","3_3_2"]} // toS,toC: action announce передеает объявление комбинации
 {"status":"action", "player":99, "action":"discard", "value":["3_1_1"]} // toS,toC: action discard передеает id сбрасываемого в дискард тайла
 {"status":"action", "player":99, "action":"skip"} // toS: action skip  передеает серверу, что игрок не хочет использовать последний сброшенный в дискард тайл
+{"status":"action", "player":99, "action":"get_tile", "value":["2_1_1"]} // toC: action get_tile сообщает, что игрок взял тайл со стены. Это означает начало нового хода. Если ход игрока, которому отправляется сообщение, то заполнено проле value
+{"status":"players", "" }

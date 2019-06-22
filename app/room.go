@@ -183,7 +183,7 @@ func generateReserve(w []string) (wall, reserve []string) {
 }
 
 func generateHand(w []string) (wall, h hand) {
-	h = make(hand,handSize)
+	h = make(hand, handSize)
 	copy(h, w[:handSize])
 	h.sortHand()
 	return w[handSize:], h
@@ -207,11 +207,12 @@ func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 		if j == playerNumber {
 			privateStatement.Players[100] = player
 		} else {
-			//privateStatement.Players[j] = playerStatement{
-			//	Open:    player.Open,
-			//	Discard: player.Discard,
-			//}
-			privateStatement.Players[j] = player
+			privateStatement.Players[j] = &playerStatement{
+				Open:    player.Open,
+				Discard: player.Discard,
+				Name:    player.Name, // TODO add name
+			}
+			//privateStatement.Players[j] = player
 		}
 	}
 	return privateStatement

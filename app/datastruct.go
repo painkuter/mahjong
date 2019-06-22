@@ -18,6 +18,7 @@ type statement struct {
 }
 
 type playerStatement struct {
+	Name        string `json:"name"`         // [public]
 	CurrentTile string `json:"current_tile"` // [private]
 	Hand        hand   `json:"hand"`         // [private]
 	//Available   []hand `json:"available"`    // [private]
