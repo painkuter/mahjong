@@ -3,6 +3,9 @@ package app
 import (
 	"encoding/json"
 	"sort"
+	"sync"
+
+	"fmt"
 
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
@@ -11,6 +14,7 @@ import (
 type playerConn struct {
 	name   string
 	number int //1-4
+	m      sync.Mutex
 	ws     *websocket.Conn
 	r      *room
 }
@@ -20,6 +24,10 @@ func (p *playerConn) sendStatement(s *statement) {
 }
 
 // Send message to game chat
+func (p *playerConn) sendAction(action gameAction) {
+	p.wsMessage(actionType, action)
+}
+
 func (p *playerConn) sendMessage(message string) {
 	p.wsMessage(messageType, message)
 }
@@ -30,12 +38,14 @@ func (p *playerConn) start() {
 
 func (p *playerConn) stop(pNumber int) {
 	p.wsMessage(stopType, pNumber)
+	p.m.Lock()
 	p.ws.WriteMessage(websocket.CloseMessage, []byte{})
+	p.m.Unlock()
 }
 
 func (p *playerConn) receiver() {
 	logger.Info("Listening for playerConn " + p.name)
-	defer p.ws.Close()
+	defer p.close()
 	for {
 		_, message, err := p.ws.ReadMessage()
 		if err != nil {
@@ -72,18 +82,32 @@ func (p *playerConn) receiver() {
 }
 
 func (p *playerConn) wsMessage(s string, b interface{}) {
+	p.m.Lock()
+	fmt.Printf("Lock on %p\n", p)
 	text, err := json.Marshal(wsMessage{Status: s, Body: b})
 	if err != nil {
 		logger.Error(err)
 	}
-	p.ws.WriteMessage(websocket.TextMessage, text)
+	fmt.Printf("Sending message %s to %p\n", s, p.ws)
+	err = p.ws.WriteMessage(websocket.TextMessage, text)
+	if err != nil {
+		panic(err)
+	}
+	p.m.Unlock()
+	fmt.Printf("Unlock on %p\n", p)
 }
 
 // TODO: handle player error
-func (p *playerConn) playerError (){
+func (p *playerConn) playerError() {
 	// player send wrong data -> auto defeat, disconnect
 }
 
-func (h hand) sortHand()  {
+func (h hand) sortHand() {
 	sort.Strings(h)
+}
+
+func (p *playerConn) close() {
+	p.m.Lock()
+	p.ws.Close()
+	p.m.Unlock()
 }

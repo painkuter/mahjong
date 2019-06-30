@@ -3,7 +3,10 @@ package app
 import (
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
+
+	"fmt"
 
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
@@ -32,7 +35,6 @@ func newRoom() *room {
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
 	east := randomEast()
-
 	statement := &statement{
 		Players: make(map[int]*playerStatement, 4),
 		Reserve: reserve,
@@ -65,8 +67,9 @@ func newRoom() *room {
 
 // AddPlayer adds new playerConn to the room
 func (r *room) AddPlayer(name string, ws *websocket.Conn) {
+	fmt.Printf("New websocet %p\n", ws)
 	if len(r.players) < 4 {
-		p := playerConn{name, len(r.players) + 1, ws, r}
+		p := playerConn{name, len(r.players) + 1, sync.Mutex{}, ws, r}
 		r.players = append(r.players, p)
 		//p.wsMessage("s","test")
 
@@ -76,6 +79,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 			for _, p__ := range r.players { // kill me for this naming
 				players = append(players, p__.name)
 			}
+
 			p_.wsMessage(playersType, players)
 		}
 
@@ -106,8 +110,10 @@ func (r *room) run() {
 	}
 
 	// first turn
-	r.statement.getFromWall()
-	r.updateAllPlayers()
+	r.sendStartStatement()
+	//r.statement.getFromWall()
+	//r.updateAllPlayers()
+	r.statement.nextTurn()
 
 	// waiting for some changes
 	for {
@@ -129,6 +135,18 @@ func (r *room) run() {
 func (r *room) updateAllPlayers() {
 	for i, p := range r.players {
 		p.sendStatement(r.statement.statementByPlayerNumber(i + 1))
+	}
+}
+
+func (r *room) sendStartStatement() {
+	for i, p := range r.players {
+		p.sendStatement(r.statement.statementByPlayerNumber(i + 1))
+	}
+}
+
+func (r *room) sendAction(action gameAction) {
+	for i, p := range r.players {
+		p.sendAction(r.statement.actionByPlayer(i+1, action))
 	}
 }
 
@@ -225,4 +243,15 @@ func generateUrl() string {
 		url[i] = charset[rnd.Intn(len(charset))]
 	}
 	return string(url)
+}
+
+func (s statement) actionByPlayer(player int, action gameAction) gameAction {
+	switch action.Action {
+	case skipCommand:
+	case announceCommand:
+	case discardCommand:
+	case readyHandCommand:
+	case getTileCommand:
+	}
+	return gameAction{}
 }

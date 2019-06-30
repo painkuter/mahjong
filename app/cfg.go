@@ -18,6 +18,7 @@ const (
 
 	//wsMessage types:
 	gameType  = "game" // игровые команды
+	actionType  = "action" // action
 	messageType = "message" // чат
 	playersType = "players" // добавление игрока в список
 	startType   = "start" // начало игры
@@ -28,6 +29,7 @@ const (
 	discardCommand   = "discard"
 	announceCommand  = "announce"
 	readyHandCommand = "ready_hand"
+	getTileCommand = "get_tile"
 	// meld types
 	chowType = "chow"
 	pongType = "pong"

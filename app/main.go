@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"mahjong/app/config"
+
 	"github.com/codemodus/parth"
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
@@ -105,8 +107,8 @@ func Main() {
 	http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
-	logger.Infof("Handlers initialized. Serve listening on: %s", ADDR)
-	if err := http.ListenAndServe(ADDR, nil); err != nil {
+	logger.Infof("Handlers initialized. Serve listening on: %s", config.ADDR)
+	if err := http.ListenAndServe(config.ADDR, nil); err != nil {
 		logger.Fatal("ListenAndServe:", err)
 	}
 }
@@ -123,7 +125,7 @@ func getPlayerName(r *http.Request) string {
 func getRoomURL(r *http.Request) string {
 	params, _ := url.ParseQuery(r.URL.RawQuery)
 	if len(params["room"]) > 0 {
-		if _, ok := activeRooms[params["room"][0]]; ok {
+		if _, ok := activeRooms[params["room"][0]]; ok { // looking for room by request param
 			//room found
 			return params["room"][0]
 		}

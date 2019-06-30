@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"mahjong/app"
+	"mahjong/app/config"
 
 	"github.com/google/logger"
 )
@@ -14,13 +14,13 @@ import (
 // Logging
 func InitLogging() *logger.Logger {
 	// checking directory exists
-	if _, err := os.Stat(app.LogDir); os.IsNotExist(err) {
-		os.MkdirAll(app.LogDir, os.ModePerm)
+	if _, err := os.Stat(config.LogDir); os.IsNotExist(err) {
+		os.MkdirAll(config.LogDir, os.ModePerm)
 	}
 
 	y, month, d := time.Now().Date()
 	logName := strconv.Itoa(y) + "_" + month.String() + "_" + strconv.Itoa(d)
-	f, err := os.OpenFile(app.LogDir+"/"+app.LogPrefix+logName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666) // 0666 | 0660 ?
+	f, err := os.OpenFile(config.LogDir+"/"+config.LogPrefix+logName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666) // 0666 | 0660 ?
 	if err != nil {
 		fmt.Printf("error opening file: %v", err)
 		os.Exit(1)

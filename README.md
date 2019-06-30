@@ -47,6 +47,7 @@
 * message [message] //just text message
 
 #### TODO
+* Name generator
 * spectate the room
 * print YOUR TURN +
 * ping-pong players
