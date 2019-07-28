@@ -101,12 +101,12 @@
             });
             $("#send_command").click(function () {
                 var turn = {
-                    status: "discard",
+                    action: "discard",
                     meld: "",
-                    tiles: [command.val()]
+                    value: [command.val()]
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -116,12 +116,12 @@
             // just for tests
             $("#go").click(function () {
                 var turn = {
-                    status: "skip",
+                    action: "skip",
                     meld: "",
-                    tiles: []
+                    value: []
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -134,12 +134,12 @@
                     tiles.push($(this).next().text());
                 });
                 var turn = {
-                    status: "announce",
+                    action: "announce",
                     meld: "chow",
-                    tiles: tiles
+                    value: tiles
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -152,12 +152,12 @@
                     tiles.push($(this).next().text());
                 });
                 var turn = {
-                    status: "announce",
+                    action: "announce",
                     meld: "pong",
-                    tiles: tiles
+                    value: tiles
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -170,12 +170,12 @@
                     tiles.push($(this).next().text());
                 });
                 var turn = {
-                    status: "announce",
+                    action: "announce",
                     meld: "kong",
-                    tiles: tiles
+                    value: tiles
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -184,12 +184,12 @@
             });
             $("body").on("click", ".tile", function () {
                 var turn = {
-                    status: "discard",
+                    action: "discard",
                     meld: "",
-                    tiles: [$(this).text()]
+                    value: [$(this).text()]
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 $("#current_tile").text("");

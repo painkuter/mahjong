@@ -6,8 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"fmt"
-
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 )
@@ -67,19 +65,21 @@ func newRoom() *room {
 
 // AddPlayer adds new playerConn to the room
 func (r *room) AddPlayer(name string, ws *websocket.Conn) {
-	fmt.Printf("New websocet %p\n", ws)
+	// add locks to room
+	logger.Infof("New websocet %p\n", ws)
 	if len(r.players) < 4 {
 		p := playerConn{name, len(r.players) + 1, sync.Mutex{}, ws, r}
 		r.players = append(r.players, p)
-		//p.wsMessage("s","test")
+		r.statement.Players[len(r.players)].Name = name
+		//p.wsMessage("s", "test")
+
+		var players []string
+		for _, p_ := range r.players { // kill me for this naming
+			players = append(players, p_.name)
+		}
 
 		// push player to players list:
 		for _, p_ := range r.players {
-			var players []string
-			for _, p__ := range r.players { // kill me for this naming
-				players = append(players, p__.name)
-			}
-
 			p_.wsMessage(playersType, players)
 		}
 
@@ -87,7 +87,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		if len(r.players) == 4 {
 			go r.run()
 			//TODO: check rooms list
-			Room = newRoom()
+			//Room = newRoom() todo uncomment
 		}
 	} else {
 		logger.Fatal("Players count already equals four")
@@ -97,9 +97,8 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 
 func (r *room) run() {
 	// creating receivers for all players
-	for _, p := range r.players {
-		p_ := p
-		go p_.receiver()
+	for i := range r.players {
+		go r.players[i].receiver()
 	}
 
 	// start the game
@@ -144,7 +143,10 @@ func (r *room) sendStartStatement() {
 	}
 }
 
-func (r *room) sendAction(action gameAction) {
+func (r *room) sendAction(action *gameAction) {
+	if action == nil { // error actions
+		return
+	}
 	for i, p := range r.players {
 		p.sendAction(r.statement.actionByPlayer(i+1, action))
 	}
@@ -245,13 +247,21 @@ func generateUrl() string {
 	return string(url)
 }
 
-func (s statement) actionByPlayer(player int, action gameAction) gameAction {
+func (s statement) actionByPlayer(player int, action *gameAction) gameAction {
 	switch action.Action {
 	case skipCommand:
+		return gameAction{
+			Player: player,
+			Action: skipCommand,
+		}
 	case announceCommand:
+		action.Player = player
 	case discardCommand:
+		action.Player = player
 	case readyHandCommand:
+		action.Player = player
 	case getTileCommand:
+		action.Player = player
 	}
-	return gameAction{}
+	return *action
 }

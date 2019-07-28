@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"time"
 
 	"mahjong/app/config"
 
@@ -30,6 +31,11 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	playerName, err := parth.SegmentToString(r.URL.Path, 0)
+	check(err)
+	logger.Info(playerName)
+
 	var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
 	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	homeTempl.Execute(w, data)
@@ -74,7 +80,14 @@ func newRoomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
+	//logger.Info("ws handler")
+
+	upgrader := websocket.Upgrader{
+		HandshakeTimeout: time.Second,
+		ReadBufferSize:   1024,
+		WriteBufferSize:  1024,
+	}
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if _, ok := err.(websocket.HandshakeError); ok {
 		http.Error(w, "Not a websocket handshake", 400)
 		return
@@ -86,9 +99,9 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	playerName := getPlayerName(r)
 	roomURL := getRoomURL(r)
-	activeRooms[roomURL].AddPlayer(playerName, ws)
-
 	logger.Infof("Player %s has joined to room %s", playerName, roomURL)
+
+	activeRooms[roomURL].AddPlayer(playerName, ws)
 }
 
 func Main() {

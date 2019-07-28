@@ -7,17 +7,17 @@ import (
 
 //TODO: process game here
 // processStatement processes players commands
-func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) {
-	var c playerCommand
-	err := ms.Decode(command, &c)
+func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *gameAction {
+	var comm gameAction
+	err := ms.Decode(command, &comm)
 	if err != nil {
 		logger.Warning(err)
-		return
+		return nil
 	}
 
 	logger.Infof("Processing command %v", command)
 
-	switch c.Status {
+	switch comm.Action {
 	case skipCommand:
 		// skip timer after 4 skips
 		s.Pass[playerNumber] = true
@@ -28,7 +28,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 	case announceCommand:
 		if len(s.Players[s.prevTurn()].Discard) == 0 {
 			logger.Warning("Empty discard")
-			return
+			return nil
 		}
 		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
 		//remove last tile from discard
@@ -36,58 +36,59 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 
 		//append last tile to the hand
 		h := s.Players[playerNumber].Hand
-		c.Tiles = append(c.Tiles, lastTile)
+		comm.Value = append(comm.Value, lastTile)
 		ok := false
-		switch c.Meld {
+		switch comm.Meld {
 		case chowType:
 			if playerNumber != (s.prevTurn()%4)+1 {
 				// TODO: return error
 				logger.Warning("Wrong turn for chow")
-				return
+				return nil
 			}
-			ok = h.checkChow(c.Tiles)
+			ok = h.checkChow(comm.Value)
 		case pongType:
-			ok = h.checkPong(c.Tiles)
+			ok = h.checkPong(comm.Value)
 		case kongType:
-			ok = h.checkKong(c.Tiles)
+			ok = h.checkKong(comm.Value)
 		case mahjongType:
 			if !s.Players[playerNumber].IsReady {
 				// TODO: return error: hand isn't ready
-				return
+				return nil
 			}
 			//TODO: finish game, sand full statement
 			logger.Infoln("MAHJONG!!!")
 		}
 		if !ok {
-			return
+			return nil
 		}
 
-		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, c.Tiles)
-		for _, tile := range c.Tiles {
+		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, comm.Value)
+		for _, tile := range comm.Value {
 			s.Players[playerNumber].Hand.cutTile(tile)
 		}
 		s.Step = playerNumber
 	case discardCommand:
+		logger.Info(s.Step)
 		if s.Step != playerNumber {
 			logger.Warning("Wrong player number")
-			return
+			return nil
 		}
-		if len(c.Tiles) > 1 {
+		if len(comm.Value) > 1 {
 			logger.Warning("Wrong tiles number in the command")
-			return
+			return nil
 		}
 		p := s.Players[playerNumber]
 		//TODO: remove this:
 		if p.CurrentTile == "" {
 			logger.Warning("Empty current tile")
-			return
+			return nil
 		}
 		//
 		p.Hand = append(p.Hand, p.CurrentTile)
 		p.CurrentTile = ""
-		p.Hand.cutTile(c.Tiles[0])
+		p.Hand.cutTile(comm.Value[0])
 
-		p.Discard = append(p.Discard, c.Tiles[0])
+		p.Discard = append(p.Discard, comm.Value[0])
 		// timer for announce
 		s.nextTurn()
 	case readyHandCommand:
@@ -95,9 +96,10 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		//TODO: announce to all players
 		logger.Infoln("Ready hand!")
 	default:
-		logger.Error("Wrong client command")
+		logger.Error("Wrong client command: " + comm.Action)
 		// TODO: finish with player's error
 	}
+	return &comm
 }
 
 func (s *statement) getFromWall() {

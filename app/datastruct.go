@@ -28,10 +28,11 @@ type playerStatement struct {
 	IsReady bool   `json:"is_ready"`
 }
 
-type playerCommand struct {
-	Status string `json:"status"` // skip / discard / announce
+type gameAction struct {
+	Player int    `json:"player"`
+	Action string `json:"action"` // skip / discard / announce
 	Meld   string `json:"meld"`   // chow / pong / kong
-	Tiles  hand   `json:"tiles"`
+	Value  hand   `json:"value"`
 }
 
 type pass map[int]bool
@@ -44,7 +45,7 @@ type roomResponse struct {
 	Players  int    `json:"players"`
 }
 
-type gameAction struct {
+type gameActionOld struct {
 	Player int      `json:"player"`
 	Action string   `json:"action"`
 	Meld   string   `json:"meld"`

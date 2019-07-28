@@ -5,10 +5,9 @@ import (
 	"sort"
 	"sync"
 
-	"fmt"
-
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
+	"fmt"
 )
 
 type playerConn struct {
@@ -47,7 +46,7 @@ func (p *playerConn) receiver() {
 	logger.Info("Listening for playerConn " + p.name)
 	defer p.close()
 	for {
-		_, message, err := p.ws.ReadMessage()
+		_, message, err := p.ws.ReadMessage() // TODO parse message type
 		if err != nil {
 			p.r.stop <- p.number
 			logger.Error(err)
@@ -75,6 +74,11 @@ func (p *playerConn) receiver() {
 			//TODO: update statement
 			p.r.statement.processStatement(p.number, buf.Body, p.r.timer)
 			p.r.updateAll <- struct{}{}
+		case actionType:
+			fmt.Println("action type")
+			action := p.r.statement.processStatement(p.number, buf.Body, p.r.timer)
+			// todo: process action - validation, calculation, resulting action for another [players
+			p.r.sendAction(action)
 		default:
 			p.r.updateAll <- struct{}{}
 		}
@@ -83,18 +87,18 @@ func (p *playerConn) receiver() {
 
 func (p *playerConn) wsMessage(s string, b interface{}) {
 	p.m.Lock()
-	fmt.Printf("Lock on %p\n", p)
+	//logger.Infof("Lock on %p\n", p)
 	text, err := json.Marshal(wsMessage{Status: s, Body: b})
 	if err != nil {
 		logger.Error(err)
 	}
-	fmt.Printf("Sending message %s to %p\n", s, p.ws)
+	//logger.Infof("Sending message %s to %p\n", s, p.ws)
 	err = p.ws.WriteMessage(websocket.TextMessage, text)
 	if err != nil {
 		panic(err)
 	}
 	p.m.Unlock()
-	fmt.Printf("Unlock on %p\n", p)
+	//logger.Infof("Unlock on %p\n", p)
 }
 
 // TODO: handle player error
@@ -110,4 +114,8 @@ func (p *playerConn) close() {
 	p.m.Lock()
 	p.ws.Close()
 	p.m.Unlock()
+}
+
+func parseAction(action string) gameAction {
+	return gameAction{}
 }
