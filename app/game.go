@@ -26,6 +26,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 			timer <- struct{}{}
 		}
 	case announceCommand:
+		s.lock.Lock()
+		defer s.lock.Unlock()
+
 		if len(s.Players[s.prevTurn()].Discard) == 0 {
 			logger.Warning("Empty discard")
 			return nil
@@ -68,6 +71,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		}
 		s.Step = playerNumber
 	case discardCommand:
+		s.lock.Lock()
+		defer s.lock.Unlock()
+
 		logger.Info(s.Step)
 		if s.Step != playerNumber {
 			logger.Warning("Wrong player number")

@@ -25,6 +25,8 @@ type room struct {
 	message chan string
 	// stop chanel
 	stop chan int
+
+	lock sync.RWMutex
 }
 
 func newRoom() *room {
@@ -66,6 +68,8 @@ func newRoom() *room {
 // AddPlayer adds new playerConn to the room
 func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	// add locks to room
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	logger.Infof("New websocet %p\n", ws)
 	if len(r.players) < 4 {
 		p := playerConn{name, len(r.players) + 1, sync.Mutex{}, ws, r}

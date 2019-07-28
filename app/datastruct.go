@@ -1,5 +1,7 @@
 package app
 
+import "sync"
+
 type wsMessage struct {
 	Status string      `json:"status"` //
 	Body   interface{} `json:"body"`
@@ -15,6 +17,7 @@ type statement struct {
 	Step    int                      `json:"step"` //current player number (1-4)
 	Reserve hand                     `json:"reserve"`
 	Pass    pass                     `json:"-"`
+	lock    sync.RWMutex             `json:"-"`
 }
 
 type playerStatement struct {
