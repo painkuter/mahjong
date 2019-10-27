@@ -11,7 +11,7 @@ import (
 )
 
 type room struct {
-	url string
+	Url string
 
 	players []playerConn
 	//players map[int]playerConn
@@ -29,24 +29,25 @@ type room struct {
 	lock sync.RWMutex
 }
 
-func newRoom() *room {
+func NewRoom() *room {
 	url := generateUrl()
 	wall := generateWall()
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
 	east := randomEast()
 	statement := &statement{
-		Players: make(map[int]*playerStatement, 4),
+		Players: make(map[int]*PlayerStatement, 4),
 		Reserve: reserve,
 		East:    east,
-		Wind:    1,    //East = 1
-		Step:    east, //starting from east
+		Wind:    1, // East = 1
+		//Step:    east, // starting from east = 1
+		Step: 0,
 	}
 	// Fill players statements
 	for i := 1; i <= 4; i++ {
 		var h hand
-		wall, h = generateHand(wall)
-		pStatement := playerStatement{Hand: h}
+		wall, h = generateHand(wall) // fixme
+		pStatement := PlayerStatement{Hand: h}
 		statement.Players[i] = &pStatement
 		//TODO: add wind
 	}
@@ -54,15 +55,19 @@ func newRoom() *room {
 	statement.Wall = wall
 
 	r := &room{
-		url:       url,
+		Url:       url,
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
 		message:   make(chan string),
 		statement: statement,
 	}
 	logger.Info("New room " + url)
-	activeRooms[r.url] = r
+	activeRooms[r.Url] = r
 	return r
+}
+
+func (r *room) Statement() *statement {
+	return r.statement
 }
 
 // AddPlayer adds new playerConn to the room
@@ -72,10 +77,15 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	defer r.lock.Unlock()
 	logger.Infof("New websocet %p\n", ws)
 	if len(r.players) < 4 {
-		p := playerConn{name, len(r.players) + 1, sync.Mutex{}, ws, r}
+		p := playerConn{
+			name:   name,
+			number: len(r.players) + 1,
+			lock:   sync.Mutex{},
+			ws:     ws,
+			room:   r,
+		}
 		r.players = append(r.players, p)
 		r.statement.Players[len(r.players)].Name = name
-		//p.wsMessage("s", "test")
 
 		var players []string
 		for _, p_ := range r.players { // kill me for this naming
@@ -91,7 +101,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		if len(r.players) == 4 {
 			go r.run()
 			//TODO: check rooms list
-			//Room = newRoom() todo uncomment
+			//Room = NewRoom() todo uncomment
 		}
 	} else {
 		logger.Fatal("Players count already equals four")
@@ -114,8 +124,8 @@ func (r *room) run() {
 
 	// first turn
 	r.sendStartStatement()
-	//r.statement.getFromWall()
-	//r.updateAllPlayers()
+	//room.statement.getFromWall()
+	//room.updateAllPlayers()
 	r.statement.nextTurn()
 
 	// waiting for some changes
@@ -221,7 +231,7 @@ func randomEast() int {
 func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 	// filter statement for selected playerConn (remove foreign hands, the wall and the reserve)
 	privateStatement := &statement{
-		Players: make(map[int]*playerStatement, 4),
+		Players: make(map[int]*PlayerStatement, 4),
 		Step:    s.Step,
 		Wind:    s.Wind,
 		East:    s.East,
@@ -231,7 +241,7 @@ func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 		if j == playerNumber {
 			privateStatement.Players[100] = player
 		} else {
-			privateStatement.Players[j] = &playerStatement{
+			privateStatement.Players[j] = &PlayerStatement{
 				Open:    player.Open,
 				Discard: player.Discard,
 				Name:    player.Name, // TODO add name

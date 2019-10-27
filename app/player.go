@@ -2,20 +2,20 @@ package app
 
 import (
 	"encoding/json"
+	"mahjong/app/common"
 	"sort"
 	"sync"
 
 	"github.com/google/logger"
 	"github.com/gorilla/websocket"
-	"fmt"
 )
 
 type playerConn struct {
 	name   string
 	number int //1-4
-	m      sync.Mutex
+	lock   sync.Mutex
 	ws     *websocket.Conn
-	r      *room
+	room   *room
 }
 
 func (p *playerConn) sendStatement(s *statement) {
@@ -37,25 +37,25 @@ func (p *playerConn) start() {
 
 func (p *playerConn) stop(pNumber int) {
 	p.wsMessage(stopType, pNumber)
-	p.m.Lock()
+	p.lock.Lock()
 	p.ws.WriteMessage(websocket.CloseMessage, []byte{})
-	p.m.Unlock()
+	p.lock.Unlock()
 }
 
 func (p *playerConn) receiver() {
 	logger.Info("Listening for playerConn " + p.name)
 	defer p.close()
 	for {
-		_, message, err := p.ws.ReadMessage() // TODO parse message type
+		var buf WsMessage
+		/*_, message,*/ err := p.ws.ReadJSON(&buf) // TODO parse message type
 		if err != nil {
-			p.r.stop <- p.number
+			p.room.stop <- p.number
 			logger.Error(err)
 			break
 		}
 		// TODO: parse message here
-		var buf wsMessage
-		err = json.Unmarshal(message, &buf)
-		check(err)
+		//err = json.Unmarshal(message, &buf)
+		//check(err)
 
 		switch buf.Status {
 		case messageType:
@@ -65,39 +65,37 @@ func (p *playerConn) receiver() {
 				logger.Error("Error parsing message body")
 				continue
 			}
-			p.r.message <- request
+			p.room.message <- request
 		case stopType:
-			p.r.stop <- p.number
+			p.room.stop <- p.number
 			logger.Infof("Player %v gave up", p.number)
 			//return
 		case gameType:
 			//TODO: update statement
-			p.r.statement.processStatement(p.number, buf.Body, p.r.timer)
-			p.r.updateAll <- struct{}{}
+			p.room.statement.processStatement(p.number, buf.Body, p.room.timer)
+			p.room.updateAll <- struct{}{}
 		case actionType:
-			fmt.Println("action type")
-			action := p.r.statement.processStatement(p.number, buf.Body, p.r.timer)
+			//fmt.Println("action type")
+			action := p.room.statement.processStatement(p.number, buf.Body, p.room.timer)
 			// todo: process action - validation, calculation, resulting action for another [players
-			p.r.sendAction(action)
+			p.room.sendAction(action)
 		default:
-			p.r.updateAll <- struct{}{}
+			p.room.updateAll <- struct{}{}
 		}
 	}
 }
 
 func (p *playerConn) wsMessage(s string, b interface{}) {
-	p.m.Lock()
+	p.lock.Lock()
 	//logger.Infof("Lock on %p\n", p)
-	text, err := json.Marshal(wsMessage{Status: s, Body: b})
+	text, err := json.Marshal(WsMessage{Status: s, Body: b})
 	if err != nil {
 		logger.Error(err)
 	}
 	//logger.Infof("Sending message %s to %p\n", s, p.ws)
 	err = p.ws.WriteMessage(websocket.TextMessage, text)
-	if err != nil {
-		panic(err)
-	}
-	p.m.Unlock()
+	common.Check(err)
+	p.lock.Unlock()
 	//logger.Infof("Unlock on %p\n", p)
 }
 
@@ -111,9 +109,9 @@ func (h hand) sortHand() {
 }
 
 func (p *playerConn) close() {
-	p.m.Lock()
-	p.ws.Close()
-	p.m.Unlock()
+	p.lock.Lock()
+	common.Check(p.ws.Close())
+	p.lock.Unlock()
 }
 
 func parseAction(action string) gameAction {

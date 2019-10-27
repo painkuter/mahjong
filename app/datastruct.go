@@ -2,7 +2,7 @@ package app
 
 import "sync"
 
-type wsMessage struct {
+type WsMessage struct {
 	Status string      `json:"status"` //
 	Body   interface{} `json:"body"`
 	//type
@@ -10,7 +10,7 @@ type wsMessage struct {
 }
 
 type statement struct {
-	Players map[int]*playerStatement `json:"players"`
+	Players map[int]*PlayerStatement `json:"players"`
 	Wall    hand                     `json:"wall"`
 	East    int                      `json:"east"` //east-player number (1-4)
 	Wind    int                      `json:"wind"` //wind of round (changing after 4 rounds)
@@ -20,7 +20,7 @@ type statement struct {
 	lock    sync.RWMutex             `json:"-"`
 }
 
-type playerStatement struct {
+type PlayerStatement struct {
 	Name        string `json:"name"`         // [public]
 	CurrentTile string `json:"current_tile"` // [private]
 	Hand        hand   `json:"hand"`         // [private]
@@ -41,6 +41,25 @@ type gameAction struct {
 type pass map[int]bool
 
 type hand []string
+
+func (h hand) WithTile(tile string) hand {
+	return append(h, tile)
+}
+
+func (h hand) CheckChow() bool {
+	// sort
+	return false
+}
+
+func (h hand) CheckPong() bool {
+	// map [string(1_2)] => count
+	return false
+}
+
+func (h hand) CheckKong() bool {
+	// map [string(1_2)] => count
+	return false
+}
 
 type roomResponse struct {
 	Host     string `json:"host"`

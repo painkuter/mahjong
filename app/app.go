@@ -23,10 +23,10 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
 	check(err)
 	if roomUrl == "room" {
-		roomUrl = Room.url
+		roomUrl = Room.Url
 	} else {
 		if len(roomUrl) != urlLength {
-			logger.Error("Wrong room-url")
+			logger.Error("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
 			return
 		}
@@ -45,10 +45,10 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
 	check(err)
 	if roomUrl == "room" {
-		roomUrl = Room.url
+		roomUrl = Room.Url
 	} else {
 		if len(roomUrl) != urlLength {
-			logger.Error("Wrong room-url")
+			logger.Error("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
 			return
 		}
@@ -65,7 +65,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 func roomsListHandler(w http.ResponseWriter, r *http.Request) {
 	var rooms []string
 	for _, room := range activeRooms {
-		rooms = append(rooms, room.url)
+		rooms = append(rooms, room.Url)
 	}
 	var roomsTempl = template.Must(template.ParseFiles("view/rooms.html"))
 	data := struct {
@@ -75,20 +75,22 @@ func roomsListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func newRoomHandler(w http.ResponseWriter, r *http.Request) {
-	room := newRoom()
-	http.Redirect(w, r, "/room/"+room.url, 302)
+	room := NewRoom()
+	http.Redirect(w, r, "/room/"+room.Url, 302)
 }
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+func WsHandler(w http.ResponseWriter, r *http.Request) {
 	//logger.Info("ws handler")
 
 	upgrader := websocket.Upgrader{
 		HandshakeTimeout: time.Second,
 		ReadBufferSize:   1024,
 		WriteBufferSize:  1024,
+		CheckOrigin:      websocket.IsWebSocketUpgrade,
 	}
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if _, ok := err.(websocket.HandshakeError); ok {
+	ws, err := upgrader.Upgrade(w, r, http.Header{"Set-Cookie": {"sessionID=1234"}}) // fixme
+	if e, ok := err.(websocket.HandshakeError); ok {
+		logger.Info("Websocket handshake error: ", e.Error())
 		http.Error(w, "Not a websocket handshake", 400)
 		return
 	} else if err != nil {
@@ -105,7 +107,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Main() {
-	Room = newRoom()
+	Room = NewRoom()
 	rh := http.RedirectHandler("/room", 301)
 	http.Handle("/", rh)                             // Path to redirect to connect default room
 	http.HandleFunc("/room", roomHandler)            // Path to connect default room
@@ -113,7 +115,7 @@ func Main() {
 	http.HandleFunc("/rooms-list", roomsListHandler) // Rooms list
 	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
 	http.HandleFunc("/new-room", newRoomHandler)     // Path to create new room -> redirecting to /room/[URL]
-	http.HandleFunc("/ws", wsHandler)                // WebSocket handler
+	http.HandleFunc("/ws", WsHandler)                // WebSocket handler
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
@@ -142,10 +144,10 @@ func getRoomURL(r *http.Request) string {
 			//room found
 			return params["room"][0]
 		}
-		return Room.url
+		return Room.Url
 	}
 	// this way is error
 	logger.Error("Error getting room-parameter")
 	// Need to return 400 to client
-	return Room.url
+	return Room.Url
 }

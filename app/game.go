@@ -69,12 +69,12 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		for _, tile := range comm.Value {
 			s.Players[playerNumber].Hand.cutTile(tile)
 		}
-		s.Step = playerNumber
+		s.Step = playerNumber // в случае анонса ход переходит к игроку, который забрал тайл
 	case discardCommand:
 		s.lock.Lock()
 		defer s.lock.Unlock()
 
-		logger.Info(s.Step)
+		logger.Info("Player #", s.Step, " step")
 		if s.Step != playerNumber {
 			logger.Warning("Wrong player number")
 			return nil
