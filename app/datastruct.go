@@ -1,6 +1,12 @@
 package app
 
-import "sync"
+import (
+	"sort"
+	"strconv"
+	"sync"
+
+	"mahjong/app/common"
+)
 
 type WsMessage struct {
 	Status string      `json:"status"` //
@@ -42,11 +48,44 @@ type pass map[int]bool
 
 type hand []string
 
+func (h hand) Int(i int) int {
+	if i >= len(h) {
+		return 0
+	}
+	v, err := strconv.ParseInt(string(h[i][0])+string(h[i][2]), 10, 64)
+	common.Check(err)
+	return int(v)
+}
+
+// implement sort.Interface
+func (h hand) Len() int {
+	return len(h)
+}
+
+func (h hand) Less(i, j int) bool {
+	return h.Int(i) < h.Int(j)
+}
+
+func (h hand) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
 func (h hand) WithTile(tile string) hand {
 	return append(h, tile)
 }
 
 func (h hand) CheckChow() bool {
+	h2 := make(hand, len(h))
+	copy(h2, h)
+	sort.Sort(h2)
+	var t1, t2 int
+	for i := range h2 {
+		if t1+1 == t2 && t2+1 == h2.Int(i) {
+			return true
+		}
+		t1 = t2
+		t2 = h2.Int(i)
+	}
 	// sort
 	return false
 }
