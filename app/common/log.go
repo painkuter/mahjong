@@ -26,7 +26,7 @@ func InitLogging() *logger.Logger {
 		os.Exit(1)
 	}
 
-	l := logger.Init("Logger", true, true, f)
+	l := logger.Init("Logger", true, false, f)
 	logger.Info("********APP STARTED********")
 	return l
 }
