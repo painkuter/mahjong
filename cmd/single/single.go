@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 
 	"mahjong/app"
@@ -16,8 +16,8 @@ import (
 )
 
 func main() {
-	l := common.InitLogging()
-	defer l.Close()
+	//l := common.InitLogging()
+	//defer l.Close()
 
 	r := app.NewRoom()
 	//fmt.Println("Creating server")
@@ -33,17 +33,17 @@ func main() {
 		messageCh[i] = make(chan string, 10)
 		// Connect to the server
 		url := u + "?room=" + r.Url + "&name=player_" + strconv.Itoa(i)
-		logger.Info(url)
+		log.Printf(url)
 		ws, _, err := websocket.DefaultDialer.Dial(url, nil)
-		logger.Infof("Adding player conn %p\n", ws)
+		log.Printf("Adding player conn %p\n", ws)
 		if err != nil {
-			l.Fatalf("%v", err)
+			log.Fatalf("%v", err)
 		}
 		testPlayers = append(testPlayers, ws)
 		go common.Receive(ws, messageCh[i])
 		time.Sleep(100 * time.Millisecond)
 	}
-	logger.Info("Game started")
+	log.Printf("Game started")
 
 	<-messageCh[0]              //[player_0]
 	<-messageCh[0]              //[player_0 player_1]

@@ -91,6 +91,8 @@ func (h hand) CheckChow() bool {
 }
 
 func (h hand) CheckPong() bool {
+	//m := make(map[int]int)
+
 	// map [string(1_2)] => count
 	return false
 }
