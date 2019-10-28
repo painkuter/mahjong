@@ -7,11 +7,10 @@ import (
 	"net/url"
 	"time"
 
-	"log"
-
 	"mahjong/app/config"
 
 	"github.com/codemodus/parth"
+	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -27,7 +26,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 		roomUrl = Room.Url
 	} else {
 		if len(roomUrl) != urlLength {
-			log.Print("Wrong room-Url")
+			logger.Error("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
 			return
 		}
@@ -35,7 +34,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 
 	playerName, err := parth.SegmentToString(r.URL.Path, 0)
 	check(err)
-	log.Printf(playerName)
+	logger.Info(playerName)
 
 	var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
 	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
@@ -49,7 +48,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 		roomUrl = Room.Url
 	} else {
 		if len(roomUrl) != urlLength {
-			log.Print("Wrong room-Url")
+			logger.Error("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
 			return
 		}
@@ -81,7 +80,7 @@ func newRoomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
-	//log.Printf("ws handler")
+	//logger.Info("ws handler")
 
 	upgrader := websocket.Upgrader{
 		HandshakeTimeout: time.Second,
@@ -91,18 +90,18 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	ws, err := upgrader.Upgrade(w, r, http.Header{"Set-Cookie": {"sessionID=1234"}}) // fixme
 	if e, ok := err.(websocket.HandshakeError); ok {
-		log.Printf("Websocket handshake error: ", e.Error())
+		logger.Info("Websocket handshake error: ", e.Error())
 		http.Error(w, "Not a websocket handshake", 400)
 		return
 	} else if err != nil {
-		log.Print(err)
+		logger.Error(err)
 		http.Error(w, "Runtime error", 500)
 		return
 	}
 
 	playerName := getPlayerName(r)
 	roomURL := getRoomURL(r)
-	log.Printf("Player %s has joined to room %s", playerName, roomURL)
+	logger.Infof("Player %s has joined to room %s", playerName, roomURL)
 
 	activeRooms[roomURL].AddPlayer(playerName, ws)
 }
@@ -123,9 +122,9 @@ func Main() {
 	http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
-	log.Printf("Handlers initialized. Serve listening on: %s", config.ADDR)
+	logger.Infof("Handlers initialized. Serve listening on: %s", config.ADDR)
 	if err := http.ListenAndServe(config.ADDR, nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
+		logger.Fatal("ListenAndServe:", err)
 	}
 }
 
@@ -148,7 +147,7 @@ func getRoomURL(r *http.Request) string {
 		return Room.Url
 	}
 	// this way is error
-	log.Print("Error getting room-parameter")
+	logger.Error("Error getting room-parameter")
 	// Need to return 400 to client
 	return Room.Url
 }

@@ -6,8 +6,7 @@ import (
 	"sort"
 	"sync"
 
-	"log"
-
+	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -44,14 +43,14 @@ func (p *playerConn) stop(pNumber int) {
 }
 
 func (p *playerConn) receiver() {
-	log.Printf("Listening for playerConn " + p.name)
+	logger.Info("Listening for playerConn " + p.name)
 	defer p.close()
 	for {
 		var buf WsMessage
 		/*_, message,*/ err := p.ws.ReadJSON(&buf) // TODO parse message type
 		if err != nil {
 			p.room.stop <- p.number
-			log.Print(err)
+			logger.Error(err)
 			break
 		}
 		// TODO: parse message here
@@ -63,13 +62,13 @@ func (p *playerConn) receiver() {
 			request, ok := buf.Body.(string)
 			if !ok {
 				// TODO: handle error
-				log.Print("Error parsing message body")
+				logger.Error("Error parsing message body")
 				continue
 			}
 			p.room.message <- request
 		case stopType:
 			p.room.stop <- p.number
-			log.Printf("Player %v gave up", p.number)
+			logger.Infof("Player %v gave up", p.number)
 			//return
 		case gameType:
 			//TODO: update statement
@@ -88,16 +87,16 @@ func (p *playerConn) receiver() {
 
 func (p *playerConn) wsMessage(s string, b interface{}) {
 	p.lock.Lock()
-	//log.Printf("Lock on %p\n", p)
+	//logger.Infof("Lock on %p\n", p)
 	text, err := json.Marshal(WsMessage{Status: s, Body: b})
 	if err != nil {
-		log.Print(err)
+		logger.Error(err)
 	}
-	//log.Printf("Sending message %s to %p\n", s, p.ws)
+	//logger.Infof("Sending message %s to %p\n", s, p.ws)
 	err = p.ws.WriteMessage(websocket.TextMessage, text)
 	common.Check(err)
 	p.lock.Unlock()
-	//log.Printf("Unlock on %p\n", p)
+	//logger.Infof("Unlock on %p\n", p)
 }
 
 // TODO: handle player error

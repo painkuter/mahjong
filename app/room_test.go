@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"log"
+	"github.com/google/logger"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 
@@ -41,9 +41,9 @@ func TestRoom_Run(t *testing.T) {
 		messageCh[i] = make(chan string, 10)
 		// Connect to the server
 		url := u + "?room=" + r.Url + "&name=player_" + strconv.Itoa(i)
-		log.Printf(url)
+		logger.Info(url)
 		ws, _, err := websocket.DefaultDialer.Dial(url, nil)
-		log.Printf("Adding player conn %p\n", ws)
+		logger.Infof("Adding player conn %p\n", ws)
 		if err != nil {
 			t.Fatalf("%v", err)
 		}
@@ -51,7 +51,7 @@ func TestRoom_Run(t *testing.T) {
 		go common.Receive(ws, messageCh[i])
 		time.Sleep(100 * time.Millisecond)
 	}
-	log.Printf("Game started")
+	logger.Info("Game started")
 
 	<-messageCh[0]              //[player_0]
 	<-messageCh[0]              //[player_0 player_1]

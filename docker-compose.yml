@@ -1,5 +1,0 @@
-version: '2'
-services:
-  single:
-    image: golang:1.11.4-alpine
-    command:

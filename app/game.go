@@ -1,8 +1,7 @@
 package app
 
 import (
-	"log"
-
+	"github.com/google/logger"
 	ms "github.com/mitchellh/mapstructure"
 )
 
@@ -12,11 +11,11 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 	var comm gameAction
 	err := ms.Decode(command, &comm)
 	if err != nil {
-		log.Print(err)
+		logger.Warning(err)
 		return nil
 	}
 
-	log.Printf("Processing command %v", command)
+	logger.Infof("Processing command %v", command)
 
 	switch comm.Action {
 	case skipCommand:
@@ -31,7 +30,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		defer s.lock.Unlock()
 
 		if len(s.Players[s.prevTurn()].Discard) == 0 {
-			log.Print("Empty discard")
+			logger.Warning("Empty discard")
 			return nil
 		}
 		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
@@ -46,7 +45,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		case chowType:
 			if playerNumber != (s.prevTurn()%4)+1 {
 				// TODO: return error
-				log.Print("Wrong turn for chow")
+				logger.Warning("Wrong turn for chow")
 				return nil
 			}
 			ok = h.checkChow(comm.Value)
@@ -60,7 +59,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 				return nil
 			}
 			//TODO: finish game, sand full statement
-			log.Printf("MAHJONG!!!")
+			logger.Infoln("MAHJONG!!!")
 		}
 		if !ok {
 			return nil
@@ -75,19 +74,19 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		s.lock.Lock()
 		defer s.lock.Unlock()
 
-		log.Printf("Player #", s.Step, " step")
+		logger.Info("Player #", s.Step, " step")
 		if s.Step != playerNumber {
-			log.Print("Wrong player number")
+			logger.Warning("Wrong player number")
 			return nil
 		}
 		if len(comm.Value) > 1 {
-			log.Print("Wrong tiles number in the command")
+			logger.Warning("Wrong tiles number in the command")
 			return nil
 		}
 		p := s.Players[playerNumber]
 		//TODO: remove this:
 		if p.CurrentTile == "" {
-			log.Print("Empty current tile")
+			logger.Warning("Empty current tile")
 			return nil
 		}
 		//
@@ -101,9 +100,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 	case readyHandCommand:
 		s.Players[playerNumber].IsReady = true
 		//TODO: announce to all players
-		log.Printf("Ready hand!")
+		logger.Infoln("Ready hand!")
 	default:
-		log.Print("Wrong client command: " + comm.Action)
+		logger.Error("Wrong client command: " + comm.Action)
 		// TODO: finish with player's error
 	}
 	return &comm
@@ -124,7 +123,7 @@ func (h *hand) cutTile(tile string) {
 		}
 	}
 	// TODO: handle error
-	log.Print("Tile not found")
+	logger.Warning("Tile not found")
 }
 
 // move turn to the next player

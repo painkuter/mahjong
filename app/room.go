@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/logger"
 	"github.com/gorilla/websocket"
-	"log"
 )
 
 type room struct {
@@ -61,7 +61,7 @@ func NewRoom() *room {
 		message:   make(chan string),
 		statement: statement,
 	}
-	log.Printf("New room " + url)
+	logger.Info("New room " + url)
 	activeRooms[r.Url] = r
 	return r
 }
@@ -75,7 +75,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	// add locks to room
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	log.Printf("New websocet %p\n", ws)
+	logger.Infof("New websocet %p\n", ws)
 	if len(r.players) < 4 {
 		p := playerConn{
 			name:   name,
@@ -104,7 +104,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 			//Room = NewRoom() todo uncomment
 		}
 	} else {
-		log.Fatal("Players count already equals four")
+		logger.Fatal("Players count already equals four")
 		//TODO: return some error
 	}
 }
@@ -116,7 +116,7 @@ func (r *room) run() {
 	}
 
 	// start the game
-	log.Printf("Starting the game")
+	logger.Info("Starting the game")
 	for _, p := range r.players {
 		//TODO: check the players
 		p.start()
@@ -136,7 +136,7 @@ func (r *room) run() {
 		case <-r.updateAll:
 			r.updateAllPlayers()
 		case pNumber := <-r.stop:
-			log.Printf("Player #%v stopped the game", pNumber)
+			logger.Infof("Player #%v stopped the game", pNumber)
 			r.stopAllPlayers(pNumber)
 		case pMessage := <-r.message:
 			r.sendMessageToAllPlayers(pMessage)
