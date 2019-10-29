@@ -15,15 +15,11 @@ import (
 )
 
 func main() {
-	//l := common.InitLogging()
-	//defer l.Close()
 
 	r := app.NewRoom()
-	//fmt.Println("Creating server")
-	//s := httptest.NewServer(http.HandlerFunc(app.WsHandler))
-	//defer s.Close()
 	go func() {
 		http.HandleFunc("/ws", app.WsHandler)
+		http.HandleFunc("/live", app.LiveHandler)
 		err := http.ListenAndServe(config.ADDR, nil)
 		if err != nil {
 			fmt.Println(err)

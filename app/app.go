@@ -3,11 +3,10 @@ package app
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
-
-	"log"
 
 	"mahjong/app/config"
 
@@ -105,6 +104,12 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Player %s has joined to room %s", playerName, roomURL)
 
 	activeRooms[roomURL].AddPlayer(playerName, ws)
+}
+
+func LiveHandler(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("response"))
+	check(err)
+	w.Header().Set("Content-Type", "application/json")
 }
 
 func Main() {
