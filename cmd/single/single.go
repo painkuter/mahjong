@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"mahjong/app/config"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 
 	"mahjong/app"
 	"mahjong/app/common"
+	"mahjong/app/config"
 )
 
 func main() {
@@ -21,12 +21,21 @@ func main() {
 	r := app.NewRoom()
 	//fmt.Println("Creating server")
 	//s := httptest.NewServer(http.HandlerFunc(app.WsHandler))
-	http.HandleFunc("/ws", app.WsHandler)
-	go http.ListenAndServe(config.ADDR, nil)
 	//defer s.Close()
+	go func() {
+		http.HandleFunc("/ws", app.WsHandler)
+		err := http.ListenAndServe(config.ADDR, nil)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}()
+	time.Sleep(1000 * time.Millisecond)
+
 	//fmt.Println("Creating clients")
 	// Convert http://127.0.0.1 to ws://127.0.0.1
 	//u := "ws" + strings.TrimPrefix("http://0.0.0.0:8079", "http")
+	//u := "ws" + strings.TrimPrefix(s.URL, "http")
 	u := "ws://" + config.ADDR
 
 	messageCh := make([]chan string, 4)
@@ -34,9 +43,10 @@ func main() {
 	for i := 0; i < 3; i++ {
 		messageCh[i] = make(chan string, 10)
 		// Connect to the server
-		url := u + "?room=" + r.Url + "&name=player_" + strconv.Itoa(i)
+		url := u + "/ws?room=" + r.Url + "&name=player_" + strconv.Itoa(i)
 		log.Printf(url)
 		ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+		common.Check(err)
 		log.Printf("Adding player conn %p\n", ws)
 		if err != nil {
 			log.Fatalf("%v", err)

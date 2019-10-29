@@ -35,5 +35,6 @@ RUN echo "Start" \
 #
 #RUN ssh-keyscan -H gitlab.ozon.ru >> /root/.ssh/known_hosts
 
+EXPOSE 80:8080
 CMD ["./mahjong/single"]
 #CMD ["./gobyexample/hello-world"]
