@@ -58,7 +58,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	w.Write([]byte(response))
+	w.Write(response)
 	w.Header().Set("Content-Type", "application/json")
 }
 
