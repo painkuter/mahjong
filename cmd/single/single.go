@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -14,11 +15,17 @@ import (
 	"mahjong/app/config"
 )
 
+func die(w http.ResponseWriter, r *http.Request) {
+	os.Exit(1)
+}
+
 func main() {
 
 	r := app.NewRoom()
 	go func() {
 		http.HandleFunc("/ws", app.WsHandler)
+		http.HandleFunc("/room", app.ActiveRoom)
+		http.HandleFunc("/die", die)
 		http.HandleFunc("/live", app.LiveHandler)
 		err := http.ListenAndServe(config.ADDR, nil)
 		if err != nil {

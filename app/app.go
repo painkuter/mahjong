@@ -75,8 +75,11 @@ func roomsListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func newRoomHandler(w http.ResponseWriter, r *http.Request) {
-	room := NewRoom()
-	http.Redirect(w, r, "/room/"+room.Url, 302)
+	http.Redirect(w, r, "/room/"+NewRoom().Url, 302)
+}
+
+func ActiveRoom(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(Room.Url))
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +116,7 @@ func LiveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Main() {
-	Room = NewRoom()
+	NewRoom()
 	rh := http.RedirectHandler("/room", 301)
 	http.Handle("/", rh)                             // Path to redirect to connect default room
 	http.HandleFunc("/room", roomHandler)            // Path to connect default room

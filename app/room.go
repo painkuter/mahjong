@@ -63,6 +63,7 @@ func NewRoom() *room {
 	}
 	log.Printf("New room " + url)
 	activeRooms[r.Url] = r
+	Room = r
 	return r
 }
 
