@@ -81,6 +81,7 @@ func Fatalf(format string, v ...interface{}) {
 // Logging
 func InitLogging() Logger {
 	if os.Getenv("DOCKER_RUN") == "true" {
+		globalLogger = Logger{}
 		return globalLogger
 	}
 
