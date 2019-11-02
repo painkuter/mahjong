@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"time"
 
+	"mahjong/app/apperr"
 	"mahjong/app/config"
 
 	"github.com/codemodus/parth"
@@ -21,7 +22,7 @@ var (
 
 func roomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
-	check(err)
+	apperr.Check(err)
 	if roomUrl == "room" {
 		roomUrl = Room.Url
 	} else {
@@ -33,7 +34,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	playerName, err := parth.SegmentToString(r.URL.Path, 0)
-	check(err)
+	apperr.Check(err)
 	log.Printf(playerName)
 
 	var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
@@ -43,7 +44,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 
 func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
-	check(err)
+	apperr.Check(err)
 	if roomUrl == "room" {
 		roomUrl = Room.Url
 	} else {
@@ -111,7 +112,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 func LiveHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := w.Write([]byte("response"))
-	check(err)
+	apperr.Check(err)
 	w.Header().Set("Content-Type", "application/json")
 }
 

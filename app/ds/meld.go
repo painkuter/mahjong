@@ -1,14 +1,12 @@
-package app
+package ds
 
-/*
 import (
 	"strconv"
 
 	"mahjong/app/apperr"
-	"mahjong/app/ds"
 )
 
-func (h ds.Hand) checkPong(pong []string) bool {
+func (h Hand) CheckPong(pong []string) bool {
 	if !(len(pong) == 3) {
 		return false
 	}
@@ -24,7 +22,7 @@ func (h ds.Hand) checkPong(pong []string) bool {
 	return count == 3
 }
 
-func (h ds.Hand) checkKong(kong []string) bool {
+func (h Hand) CheckKong(kong []string) bool {
 	if !(len(kong) == 4) {
 		return false
 	}
@@ -40,7 +38,7 @@ func (h ds.Hand) checkKong(kong []string) bool {
 	return count == 4
 }
 
-func (h ds.Hand) checkChow(chow []string) bool {
+func (h Hand) CheckChow(chow []string) bool {
 	if !(len(chow) == 3) {
 		return false
 	}
@@ -80,8 +78,7 @@ func (h ds.Hand) checkChow(chow []string) bool {
 	return count == 3
 }
 
-func (h ds.Hand) checkMahjong(mahjong [][]string) bool {
+func (h Hand) CheckMahjong(mahjong [][]string) bool {
 
 	return true
 }
-*/

@@ -2,12 +2,12 @@ package main
 
 import (
 	"mahjong/app"
-	"mahjong/app/common"
+	"mahjong/app/common/log"
 )
 
 // just starter
 func main() {
-	l := common.InitLogging()
+	l := log.InitLogging()
 	defer l.Close()
 
 	app.Main()

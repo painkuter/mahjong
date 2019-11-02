@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,7 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 
 	"mahjong/app"
+	"mahjong/app/apperr"
 	"mahjong/app/common"
+	"mahjong/app/common/log"
 	"mahjong/app/config"
 )
 
@@ -19,7 +20,14 @@ func die(w http.ResponseWriter, r *http.Request) {
 	os.Exit(1)
 }
 
+type testCon struct {
+	conn []*websocket.Conn
+}
+
 func main() {
+
+	l := log.InitLogging()
+	l.Close()
 
 	r := app.NewRoom()
 	go func() {
@@ -42,47 +50,63 @@ func main() {
 	u := "ws://" + config.ADDR
 
 	messageCh := make([]chan string, 4)
-	var testPlayers []*websocket.Conn
+	var testPlayers testCon
 	for i := 0; i < 3; i++ {
 		messageCh[i] = make(chan string, 10)
 		// Connect to the server
 		url := u + "/ws?room=" + r.Url + "&name=player_" + strconv.Itoa(i)
-		log.Printf(url)
+		log.Info(url)
 		ws, _, err := websocket.DefaultDialer.Dial(url, nil)
-		common.Check(err)
-		log.Printf("Adding player conn %p\n", ws)
+		apperr.Check(err)
+		log.Infof("Adding player conn %p\n", ws)
 		if err != nil {
 			log.Fatalf("%v", err)
 		}
-		testPlayers = append(testPlayers, ws)
+		testPlayers.conn = append(testPlayers.conn, ws)
 		go common.Receive(ws, messageCh[i])
 		time.Sleep(100 * time.Millisecond)
 	}
-	log.Printf("Game started")
+	log.Info("Game started")
 
-	<-messageCh[0]              //[player_0]
-	<-messageCh[0]              //[player_0 player_1]
-	<-messageCh[0]              //[player_0 player_1 player_2]
-	<-messageCh[0]              //[player_0 player_1 player_2 player_3]
-	<-messageCh[0]              //start
-	fmt.Println(<-messageCh[0]) //map
+	<-messageCh[0] //[player_0]
+	<-messageCh[0] //[player_0 player_1]
+	<-messageCh[0] //[player_0 player_1 player_2]
+	<-messageCh[0] //[player_0 player_1 player_2 player_3]
+	<-messageCh[0] //start
+	//fmt.Println(<-messageCh[0]) //map
 
 	time.Sleep(time.Millisecond * 100) // waiting for all players
-	testPlayers[0].WriteMessage(websocket.TextMessage, []byte(`{"status":"action","body":{"action":"discard", "value":["1_7_1"]}}`))
-	fmt.Println(<-messageCh[0]) //
-	testPlayers[1].WriteMessage(websocket.TextMessage, []byte(`{"status":"action","body":{"action":"discard", "value":["1_1_2"]}}`))
-	fmt.Println(<-messageCh[0]) //
-	fmt.Println(<-messageCh[0]) //
-	fmt.Println(<-messageCh[0]) //
-	fmt.Println("done")
+	/*	testPlayers.conn[0].WriteMessage(websocket.TextMessage, []byte(
+			`{"status":"action","body":{"action":"discard", "value":["1_7_1"]}}`))
+		fmt.Println(<-messageCh[0]) //
+		testPlayers.conn[1].WriteMessage(websocket.TextMessage, []byte(
+			`{"status":"action","body":{"action":"discard", "value":["1_1_2"]}}`))
+		fmt.Println(<-messageCh[0]) //
+		//fmt.Println(<-messageCh[0]) //
+		//fmt.Println(<-messageCh[0]) //
+		fmt.Println("done")*/
 	for {
-		makeTurn(r.Statement().Step, r.Statement().Players[r.Statement().Step])
+		testPlayers.makeTurn(r.Statement().Step, r.Statement().Players[r.Statement().Step])
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
-func makeTurn(step int, statement *app.PlayerStatement) {
+func (c testCon) makeTurn(step int, statement *app.PlayerStatement) {
 	switch step {
 	case 0, 1, 2:
+
+		chow := statement.Hand.FindChow()
+		if chow != nil {
+			turn := fmt.Sprintf(`{"status":"action","body":{"action":"announce", "value":%v}}`, chow)
+			err := c.conn[1].WriteMessage(websocket.TextMessage, []byte(turn))
+			apperr.Check(err)
+		}
+
+		turn := fmt.Sprintf(`{"status":"action","body":{"action":"discard", "value":["%v"]}}`, statement.Hand[0])
+		fmt.Println(turn)
+		err := c.conn[step].WriteMessage(websocket.TextMessage, []byte(turn))
+		apperr.Check(err)
+
 		//statement.Hand
 		// Поиск комбинации в руке + последний тайл из дискарда
 	}

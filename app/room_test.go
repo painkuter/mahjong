@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -10,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"log"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 
 	"mahjong/app/common"
+	log2 "mahjong/app/common/log"
 )
 
 func TestWall(t *testing.T) {
@@ -24,7 +25,7 @@ func TestWall(t *testing.T) {
 }
 
 func TestRoom_Run(t *testing.T) {
-	l := common.InitLogging()
+	l := log2.InitLogging()
 	defer l.Close()
 
 	r := NewRoom()
@@ -85,7 +86,7 @@ func HelpReceiver(ws *websocket.Conn, messageCh chan string) {
 		}
 		var buf WsMessage
 		err = json.Unmarshal(message, &buf)
-		check(err)
+		apperr.Check(err)
 		var str string
 		switch buf.Body.(type) {
 		case []interface{}:

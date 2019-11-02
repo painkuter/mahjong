@@ -2,13 +2,12 @@ package app
 
 import (
 	"encoding/json"
-	"mahjong/app/common"
-	"sort"
+	"log"
 	"sync"
 
-	"log"
-
 	"github.com/gorilla/websocket"
+
+	"mahjong/app/apperr"
 )
 
 type playerConn struct {
@@ -39,7 +38,8 @@ func (p *playerConn) start() {
 func (p *playerConn) stop(pNumber int) {
 	p.wsMessage(stopType, pNumber)
 	p.lock.Lock()
-	p.ws.WriteMessage(websocket.CloseMessage, []byte{})
+	err := p.ws.WriteMessage(websocket.CloseMessage, []byte{})
+	apperr.Check(err)
 	p.lock.Unlock()
 }
 
@@ -56,7 +56,7 @@ func (p *playerConn) receiver() {
 		}
 		// TODO: parse message here
 		//err = json.Unmarshal(message, &buf)
-		//check(err)
+		//apperr.Check(err)
 
 		switch buf.Status {
 		case messageType:
@@ -93,9 +93,9 @@ func (p *playerConn) wsMessage(s string, b interface{}) {
 	if err != nil {
 		log.Print(err)
 	}
-	//log.Printf("Sending message %s to %p\n", s, p.ws)
+	log.Printf("Sending message %s:%s to %d\n", s, text, p.number)
 	err = p.ws.WriteMessage(websocket.TextMessage, text)
-	common.Check(err)
+	apperr.Check(err)
 	p.lock.Unlock()
 	//log.Printf("Unlock on %p\n", p)
 }
@@ -105,13 +105,13 @@ func (p *playerConn) playerError() {
 	// player send wrong data -> auto defeat, disconnect
 }
 
-func (h hand) sortHand() {
+/*func (h ds.Hand) sortHand() {
 	sort.Strings(h)
-}
+}*/
 
 func (p *playerConn) close() {
 	p.lock.Lock()
-	common.Check(p.ws.Close())
+	apperr.Check(p.ws.Close())
 	p.lock.Unlock()
 }
 

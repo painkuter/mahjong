@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	"mahjong/app/apperr"
 	"mahjong/app/ds"
 )
 
@@ -17,7 +18,7 @@ func Receive(ws *websocket.Conn, messageCh chan string) {
 		}
 		var buf ds.WsMessage
 		err = json.Unmarshal(message, &buf)
-		Check(err)
+		apperr.Check(err)
 		var str string
 		switch buf.Body.(type) {
 		case []interface{}:

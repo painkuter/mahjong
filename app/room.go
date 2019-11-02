@@ -1,13 +1,15 @@
 package app
 
 import (
+	"mahjong/app/ds"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"log"
+
+	"github.com/gorilla/websocket"
 )
 
 type room struct {
@@ -45,7 +47,7 @@ func NewRoom() *room {
 	}
 	// Fill players statements
 	for i := 1; i <= 4; i++ {
-		var h hand
+		var h ds.Hand
 		wall, h = generateHand(wall) // fixme
 		pStatement := PlayerStatement{Hand: h}
 		statement.Players[i] = &pStatement
@@ -217,10 +219,10 @@ func generateReserve(w []string) (wall, reserve []string) {
 	return w[reserveSize:], w[:reserveSize]
 }
 
-func generateHand(w []string) (wall, h hand) {
-	h = make(hand, handSize)
+func generateHand(w []string) (wall, h ds.Hand) {
+	h = make(ds.Hand, handSize)
 	copy(h, w[:handSize])
-	h.sortHand()
+	h.SortHand()
 	return w[handSize:], h
 }
 
