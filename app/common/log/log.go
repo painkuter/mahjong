@@ -12,7 +12,10 @@ import (
 	"mahjong/app/config"
 )
 
-var globalLogger Logger
+var (
+	globalLogger Logger
+	depth        = 1
+)
 
 type Logger struct {
 	gl  *logger.Logger
@@ -23,56 +26,56 @@ func Info(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
 	}
-	globalLogger.gl.Info(v...)
+	globalLogger.gl.InfoDepth(depth, v...)
 }
 
 func Warning(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
 	}
-	globalLogger.gl.Warning(v...)
+	globalLogger.gl.WarningDepth(depth, v...)
 }
 
 func Error(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
 	}
-	globalLogger.gl.Error(v...)
+	globalLogger.gl.ErrorDepth(depth, v...)
 }
 
 func Fatal(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
 	}
-	globalLogger.gl.Fatal(v...)
+	globalLogger.gl.FatalDepth(depth, v...)
 }
 
 func Infof(format string, v ...interface{}) {
 	if globalLogger.std {
 		log.Printf(format, v...)
 	}
-	globalLogger.gl.Info(v...)
+	globalLogger.gl.InfoDepth(depth, fmt.Sprintf(format, v...))
 }
 
 func Warningf(format string, v ...interface{}) {
 	if globalLogger.std {
-		log.Printf(format, v...)
+		log.Printf(format, fmt.Sprintf(format, v...))
 	}
-	globalLogger.gl.Warning(v...)
+	globalLogger.gl.WarningDepth(depth, v...)
 }
 
 func Errorf(format string, v ...interface{}) {
 	if globalLogger.std {
-		log.Printf(format, v...)
+		log.Printf(format, fmt.Sprintf(format, v...))
 	}
-	globalLogger.gl.Error(v...)
+	globalLogger.gl.ErrorDepth(depth, v...)
 }
 
 func Fatalf(format string, v ...interface{}) {
 	if globalLogger.std {
 		log.Printf(format, v...)
 	}
-	globalLogger.gl.Fatal(v...)
+	globalLogger.gl.FatalDepth(depth, fmt.Sprintf(format, v...))
 }
 
 // Logging

@@ -27,7 +27,7 @@ type testCon struct {
 func main() {
 
 	l := log.InitLogging()
-	l.Close()
+	defer l.Close()
 
 	r := app.NewRoom()
 	go func() {
