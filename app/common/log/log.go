@@ -25,6 +25,7 @@ type Logger struct {
 func Info(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
+		return
 	}
 	globalLogger.gl.InfoDepth(depth, v...)
 }
@@ -32,6 +33,7 @@ func Info(v ...interface{}) {
 func Warning(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
+		return
 	}
 	globalLogger.gl.WarningDepth(depth, v...)
 }
@@ -39,6 +41,7 @@ func Warning(v ...interface{}) {
 func Error(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
+		return
 	}
 	globalLogger.gl.ErrorDepth(depth, v...)
 }
@@ -46,6 +49,7 @@ func Error(v ...interface{}) {
 func Fatal(v ...interface{}) {
 	if globalLogger.std {
 		log.Print(v...)
+		return
 	}
 	globalLogger.gl.FatalDepth(depth, v...)
 }
@@ -53,6 +57,7 @@ func Fatal(v ...interface{}) {
 func Infof(format string, v ...interface{}) {
 	if globalLogger.std {
 		log.Printf(format, v...)
+		return
 	}
 	globalLogger.gl.InfoDepth(depth, fmt.Sprintf(format, v...))
 }
@@ -60,6 +65,7 @@ func Infof(format string, v ...interface{}) {
 func Warningf(format string, v ...interface{}) {
 	if globalLogger.std {
 		log.Printf(format, fmt.Sprintf(format, v...))
+		return
 	}
 	globalLogger.gl.WarningDepth(depth, v...)
 }
@@ -67,6 +73,7 @@ func Warningf(format string, v ...interface{}) {
 func Errorf(format string, v ...interface{}) {
 	if globalLogger.std {
 		log.Printf(format, fmt.Sprintf(format, v...))
+		return
 	}
 	globalLogger.gl.ErrorDepth(depth, v...)
 }
@@ -74,6 +81,7 @@ func Errorf(format string, v ...interface{}) {
 func Fatalf(format string, v ...interface{}) {
 	if globalLogger.std {
 		log.Printf(format, v...)
+		return
 	}
 	globalLogger.gl.FatalDepth(depth, fmt.Sprintf(format, v...))
 }
@@ -81,7 +89,7 @@ func Fatalf(format string, v ...interface{}) {
 // Logging
 func InitLogging() Logger {
 	if os.Getenv("DOCKER_RUN") == "true" {
-		globalLogger = Logger{}
+		globalLogger = Logger{std: true}
 		return globalLogger
 	}
 
@@ -103,7 +111,7 @@ func InitLogging() Logger {
 	return globalLogger
 }
 
-func (l *Logger) Close() {
+func (l Logger) Close() {
 	if !l.std {
 		globalLogger.gl.Close()
 	}
