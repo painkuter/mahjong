@@ -1,11 +1,11 @@
 package apperr
 
-import "fmt"
+import "mahjong/app/common/log"
 
 func Check(err error) {
 	if err != nil {
 		//TODO: logging
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 		panic(err)
 	}
 }

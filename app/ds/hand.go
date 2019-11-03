@@ -1,6 +1,7 @@
 package ds
 
 import (
+	"encoding/json"
 	"log"
 	"sort"
 	"strconv"
@@ -74,6 +75,13 @@ func (h Hand) FindChow() Hand {
 	}
 	return nil
 }
+
+func (h Hand) Print() string {
+	result, err := json.Marshal(h)
+	apperr.Check(err)
+	return string(result)
+}
+
 /*
 func (h Hand) CheckPong() bool {
 	//m := make(map[int]int)
@@ -93,6 +101,9 @@ func (h Hand) SortHand() {
 
 // removes tile from the hand
 func (h *Hand) CutTile(tile string) {
+	if tile == "" || len(*h) == 0 {
+		return
+	}
 	for i, elem := range *h {
 		if tile == elem {
 			*h = append((*h)[:i], (*h)[i+1:]...) //we use pointer to slice to avoid problems with capacity

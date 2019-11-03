@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 
+	"mahjong/app/apperr"
 	"mahjong/app/common"
 	log2 "mahjong/app/common/log"
 )
@@ -61,7 +62,7 @@ func TestRoom_Run(t *testing.T) {
 	<-messageCh[0]              //start
 	fmt.Println(<-messageCh[0]) //statement: map[...]
 
-	time.Sleep(time.Millisecond * 100)  // waiting for all players
+	time.Sleep(time.Millisecond * 100) // waiting for all players
 	testPlayers[0].WriteMessage(websocket.TextMessage, []byte(`{"status":"action","body":{"action":"discard", "value":["1_7_1"]}}`))
 	fmt.Println(<-messageCh[0]) //
 	testPlayers[1].WriteMessage(websocket.TextMessage, []byte(`{"status":"action","body":{"action":"discard", "value":["1_1_2"]}}`))

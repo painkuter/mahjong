@@ -256,6 +256,9 @@ func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 }
 
 func generateUrl() string {
+	if true {
+		return "AAA"
+	}
 	var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	url := make([]byte, urlLength)
 	for i := range url {

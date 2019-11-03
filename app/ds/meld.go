@@ -1,6 +1,7 @@
 package ds
 
 import (
+	"fmt"
 	"strconv"
 
 	"mahjong/app/apperr"
@@ -75,6 +76,7 @@ func (h Hand) CheckChow(chow []string) bool {
 			count++
 		}
 	}
+	fmt.Println("Chow")
 	return count == 3
 }
 

@@ -1,20 +1,20 @@
 package app
 
 import (
-	"log"
-
 	ms "github.com/mitchellh/mapstructure"
+
+	"mahjong/app/common/log"
 )
 
 //TODO: process game here
 // processStatement processes players commands
 func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *gameAction {
-	log.Printf("Processing command %v", command)
+	log.Infof("Processing command %v from player #%d", command, playerNumber)
 
 	var comm gameAction
 	err := ms.Decode(command, &comm)
 	if err != nil {
-		log.Print(err)
+		log.Info(err)
 		return nil
 	}
 
@@ -30,23 +30,26 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		s.lock.Lock()
 		defer s.lock.Unlock()
 
-		if len(s.Players[s.prevTurn()].Discard) == 0 {
-			log.Print("Empty discard")
-			return nil
-		}
-		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
+		//if len(s.Players[s.prevTurn()].Discard) == 0 {
+		//	log.Info("Empty discard")
+		//	return nil
+		//}
+		lastTile := s.lastTile()
 		//remove last tile from discard
-		s.Players[s.prevTurn()].Discard.CutTile(lastTile)
+		s.Players[s.prevTurn()].GetDiscard().CutTile(lastTile)
 
 		//append last tile to the hand
 		h := s.Players[playerNumber].Hand
-		comm.Value = append(comm.Value, lastTile)
-		ok := false
+		/*		if lastTile != "" {
+				comm.Value = append(comm.Value, lastTile)
+			}*/
+		var ok bool
 		switch comm.Meld {
 		case chowType:
-			if playerNumber != (s.prevTurn()%4)+1 {
+			if playerNumber != s.Step {
+				//if playerNumber != (s.prevTurn()%4)+1 {
 				// TODO: return error
-				log.Print("Wrong turn for chow")
+				log.Info("Wrong turn for chow")
 				return nil
 			}
 			ok = h.CheckChow(comm.Value)
@@ -60,7 +63,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 				return nil
 			}
 			//TODO: finish game, sand full statement
-			log.Printf("MAHJONG!!!")
+			log.Infof("MAHJONG!!!")
+		default:
+			log.Warning("Wrong command")
 		}
 		if !ok {
 			return nil
@@ -75,19 +80,19 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		s.lock.Lock()
 		defer s.lock.Unlock()
 
-		log.Printf("Player #", s.Step, " step")
+		log.Infof("Player #%d step", s.Step)
 		if s.Step != playerNumber {
-			log.Print("Wrong player number")
+			log.Info("Wrong player number")
 			return nil
 		}
 		if len(comm.Value) > 1 {
-			log.Print("Wrong tiles number in the command")
+			log.Info("Wrong tiles number in the command")
 			return nil
 		}
 		p := s.Players[playerNumber]
 		//TODO: remove this:
 		if p.CurrentTile == "" {
-			log.Print("Empty current tile")
+			log.Info("Empty current tile")
 			return nil
 		}
 		//
@@ -101,9 +106,9 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 	case readyHandCommand:
 		s.Players[playerNumber].IsReady = true
 		//TODO: announce to all players
-		log.Printf("Ready hand!")
+		log.Infof("Ready hand!")
 	default:
-		log.Print("Wrong client command: " + comm.Action)
+		log.Info("Wrong client command: " + comm.Action)
 		// TODO: finish with player's error
 	}
 	return &comm
@@ -125,7 +130,7 @@ func (h *ds.Hand) cutTile(tile string) {
 		}
 	}
 	// TODO: handle error
-	log.Print("Tile not found")
+	log.Info("Tile not found")
 }*/
 
 // move turn to the next player
@@ -136,12 +141,17 @@ func (s *statement) nextTurn() {
 
 // returns last player's number
 func (s *statement) prevTurn() int {
-	return (s.Step+4)%4 - 1
+	return (s.Step+2)%4 + 1
 }
 
 // returns last tile name
 func (s *statement) lastTile() string {
-	return s.Players[s.prevTurn()].Discard[:1][0]
+	pt := s.prevTurn()
+	discard := s.Players[pt].Discard // только боты могут объявлять на первом ходу
+	if discard != nil {
+		return discard[:1][0]
+	}
+	return ""
 }
 
 func (p pass) checkSkip() bool {

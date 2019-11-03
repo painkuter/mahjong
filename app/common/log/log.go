@@ -102,7 +102,7 @@ func InitLogging() Logger {
 	logName := strconv.Itoa(y) + "_" + month.String() + "_" + strconv.Itoa(d)
 	f, err := os.OpenFile(config.LogDir+"/"+config.LogPrefix+logName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666) // 0666 | 0660 ?
 	if err != nil {
-		fmt.Printf("error opening file: %v", err)
+		log.Fatalf("error opening file: %v", err)
 		os.Exit(1)
 	}
 
