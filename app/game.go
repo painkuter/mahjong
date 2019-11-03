@@ -17,6 +17,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 		log.Info(err)
 		return nil
 	}
+	comm.Player = playerNumber
 
 	switch comm.Action {
 	case skipCommand:

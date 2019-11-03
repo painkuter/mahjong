@@ -268,6 +268,7 @@ func generateUrl() string {
 }
 
 func (s statement) actionByPlayer(player int, action *gameAction) gameAction {
+	player = action.Player
 	switch action.Action {
 	case skipCommand:
 		return gameAction{
