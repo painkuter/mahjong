@@ -71,25 +71,9 @@ func main() {
 		go common.Receive(ws, messageCh[i])
 		time.Sleep(100 * time.Millisecond)
 	}
+	time.Sleep(time.Millisecond * 100) // waiting for all players
 	log.Info("Single game ready. Waiting for 4th played connection")
 
-	<-messageCh[0] //[player_0]
-	<-messageCh[0] //[player_0 player_1]
-	<-messageCh[0] //[player_0 player_1 player_2]
-	<-messageCh[0] //[player_0 player_1 player_2 player_3]
-	<-messageCh[0] //start
-	//fmt.Println(<-messageCh[0]) //map
-
-	time.Sleep(time.Millisecond * 100) // waiting for all players
-	/*	testPlayers.conn[0].WriteMessage(websocket.TextMessage, []byte(
-			`{"status":"action","body":{"action":"discard", "value":["1_7_1"]}}`))
-		fmt.Println(<-messageCh[0]) //
-		testPlayers.conn[1].WriteMessage(websocket.TextMessage, []byte(
-			`{"status":"action","body":{"action":"discard", "value":["1_1_2"]}}`))
-		fmt.Println(<-messageCh[0]) //
-		//fmt.Println(<-messageCh[0]) //
-		//fmt.Println(<-messageCh[0]) //
-		fmt.Println("done")*/
 	for {
 		testPlayers.makeTurn(r.Statement().Step, r.Statement().Players[r.Statement().Step])
 		time.Sleep(100 * time.Millisecond)

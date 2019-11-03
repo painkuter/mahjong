@@ -15,12 +15,13 @@ type WsMessage struct {
 
 type statement struct {
 	Players   map[int]*PlayerStatement `json:"players"`
+	LastTile  string                   `json:"last_tile,omitempty"`
 	Wall      ds.Hand                  `json:"wall"`
 	East      int                      `json:"east"`       //east-player number (1-4)
 	Wind      int                      `json:"wind"`       //wind of round (changing after 4 rounds)
 	Step      int                      `json:"step"`       //current player number (1-4)
 	StepCount int                      `json:"step_count"` // порядковый номер хода
-	Reserve   ds.Hand                  `json:"reserve"`
+	Reserve   ds.Hand                  `json:"reserve,omitempty"`
 	Pass      pass                     `json:"-"`
 	lock      sync.RWMutex             `json:"-"`
 }
