@@ -58,9 +58,9 @@ type roomResponse struct {
 	Players  int    `json:"players"`
 }
 
-type gameActionOld struct {
+/*type gameActionOld struct {
 	Player int      `json:"player"`
 	Action string   `json:"action"`
 	Meld   string   `json:"meld"`
 	Value  []string `json:"value"`
-}
+}*/

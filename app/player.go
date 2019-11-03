@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -49,7 +48,6 @@ func (p *playerConn) receiver() {
 	log.Info("Listening for playerConn " + p.name)
 	defer p.close()
 	for {
-		fmt.Println("message")
 		//p.lock.Lock()
 		//fmt.Println("locked")
 		var buf ds.WsMessage

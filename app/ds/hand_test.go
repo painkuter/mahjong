@@ -57,3 +57,23 @@ func TestCutTile(t *testing.T) {
 	h.CutTile("1_9_3")
 	assert.Equal(t, Hand{"1_1_1", "1_2_3", "1_1_3", "1_1_4"}, h)
 }
+
+func TestHand_FindPong(t *testing.T) {
+	h := Hand{"1_1_1", "1_1_3", "1_1_2", "1_2_3", "1_3_4"}
+	assert.Equal(t, Hand{"1_1_1", "1_1_2", "1_1_3"}, h.FindPong())
+}
+
+func TestHand_FindPong_Nil(t *testing.T) {
+	h := Hand{"1_1_1", "1_2_3", "1_1_2", "1_2_4", "1_3_4"}
+	assert.Nil(t, h.FindPong())
+}
+
+func TestHand_FindKong(t *testing.T) {
+	h := Hand{"1_1_1", "1_1_3", "1_1_2", "1_1_4", "1_2_3", "1_3_4"}
+	assert.Equal(t, Hand{"1_1_1", "1_1_2", "1_1_3", "1_1_4"}, h.FindKong())
+}
+
+func TestHand_FindKong_Nil(t *testing.T) {
+	h := Hand{"1_1_1", "1_1_3", "1_1_2", "1_2_4", "1_3_4"}
+	assert.Nil(t, h.FindKong())
+}

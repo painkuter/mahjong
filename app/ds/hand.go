@@ -113,3 +113,27 @@ func (h *Hand) CutTile(tile string) {
 	// TODO: handle error
 	log.Print("Tile not found")
 }
+
+func (h Hand) FindPong() Hand {
+	h.SortHand()
+	tiles := make(map[int]Hand)
+	for i, tile := range h {
+		tiles[h.Int(i)] = append(tiles[h.Int(i)], tile)
+		if len(tiles[h.Int(i)]) == 3 {
+			return tiles[h.Int(i)]
+		}
+	}
+	return nil
+}
+
+func (h Hand) FindKong() Hand {
+	h.SortHand()
+	tiles := make(map[int]Hand)
+	for i, tile := range h {
+		tiles[h.Int(i)] = append(tiles[h.Int(i)], tile)
+		if len(tiles[h.Int(i)]) == 4 {
+			return tiles[h.Int(i)]
+		}
+	}
+	return nil
+}

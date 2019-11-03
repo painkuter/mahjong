@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"mahjong/app/apperr"
@@ -26,7 +27,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 	if roomUrl == "room" {
 		roomUrl = Room.Url
 	} else {
-		if len(roomUrl) != urlLength {
+		if len(roomUrl) != UrlLength {
 			log.Info("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
 			return
@@ -48,7 +49,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 	if roomUrl == "room" {
 		roomUrl = Room.Url
 	} else {
-		if len(roomUrl) != urlLength {
+		if len(roomUrl) != UrlLength {
 			log.Info("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
 			return
@@ -84,8 +85,6 @@ func ActiveRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
-	//log.Printf("ws handler")
-
 	upgrader := websocket.Upgrader{
 		HandshakeTimeout: time.Second,
 		ReadBufferSize:   1024,
@@ -103,8 +102,13 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	playerName := getPlayerName(r)
-	roomURL := getRoomURL(r)
+	roomURL, err := getRoomURL(r)
+	if err != nil {
+		http.Error(w, "Wrong room URL", 400)
+	}
+	playersCount := len(activeRooms[roomURL].players)
+
+	playerName := getPlayerName(r, playersCount)
 	log.Infof("Player %s has joined to room %s", playerName, roomURL)
 
 	activeRooms[roomURL].AddPlayer(playerName, ws)
@@ -138,26 +142,28 @@ func Main() {
 	}
 }
 
-func getPlayerName(r *http.Request) string {
-	playerName := "Anonymous Player" //TODO: add number to anonymous name
-	params, _ := url.ParseQuery(r.URL.RawQuery)
-	if len(params["name"]) > 0 {
-		playerName = params["name"][0]
+func getPlayerName(r *http.Request, playersCount int) string {
+	params, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		log.Error("Error getting player name: ", err)
 	}
-	return playerName
+	if len(params["name"]) > 0 {
+		return params["name"][0]
+	}
+	return "Anonymous Player #" + strconv.Itoa(playersCount+1)
 }
 
-func getRoomURL(r *http.Request) string {
+func getRoomURL(r *http.Request) (string, error) {
 	params, _ := url.ParseQuery(r.URL.RawQuery)
 	if len(params["room"]) > 0 {
 		if _, ok := activeRooms[params["room"][0]]; ok { // looking for room by request param
 			//room found
-			return params["room"][0]
+			return params["room"][0], nil
 		}
-		return Room.Url
+		return Room.Url, nil
 	}
 	// this way is error
 	log.Error("Error getting room-parameter")
 	// Need to return 400 to client
-	return Room.Url
+	return Room.Url, nil
 }

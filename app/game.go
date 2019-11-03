@@ -46,7 +46,7 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 			}*/
 		var ok bool
 		switch comm.Meld {
-		case chowType:
+		case ChowType:
 			if playerNumber != s.Step {
 				//if playerNumber != (s.prevTurn()%4)+1 {
 				// TODO: return error
@@ -54,11 +54,11 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 				return nil
 			}
 			ok = h.CheckChow(comm.Value)
-		case pongType:
+		case PongType:
 			ok = h.CheckPong(comm.Value)
-		case kongType:
+		case KongType:
 			ok = h.CheckKong(comm.Value)
-		case mahjongType:
+		case MahjongType:
 			if !s.Players[playerNumber].IsReady {
 				// TODO: return error: hand isn't ready
 				return nil

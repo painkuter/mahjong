@@ -1,7 +1,6 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +13,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 
-	"mahjong/app/apperr"
 	"mahjong/app/common"
 	log2 "mahjong/app/common/log"
 )
@@ -78,24 +76,3 @@ func TestRoom_Run(t *testing.T) {
 //	defer l.Close()
 //	//os.Exit(lock.Run())
 //}
-
-func HelpReceiver(ws *websocket.Conn, messageCh chan string) {
-	for {
-		_, message, err := ws.ReadMessage()
-		if err != nil {
-			panic(err)
-		}
-		var buf WsMessage
-		err = json.Unmarshal(message, &buf)
-		apperr.Check(err)
-		var str string
-		switch buf.Body.(type) {
-		case []interface{}:
-			str = fmt.Sprintf("%v", buf.Body)
-		default:
-			str = fmt.Sprintf("%v", buf.Body)
-		}
-
-		messageCh <- str
-	}
-}

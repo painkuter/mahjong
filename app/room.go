@@ -1,15 +1,15 @@
 package app
 
 import (
-	"mahjong/app/ds"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
 
-	"log"
-
 	"github.com/gorilla/websocket"
+
+	"mahjong/app/common/log"
+	"mahjong/app/ds"
 )
 
 type room struct {
@@ -63,7 +63,7 @@ func NewRoom() *room {
 		message:   make(chan string),
 		statement: statement,
 	}
-	log.Printf("New room " + url)
+	log.Info("New room " + url)
 	activeRooms[r.Url] = r
 	Room = r
 	return r
@@ -78,7 +78,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	// add locks to room
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	log.Printf("New websocet %p\n", ws)
+	log.Infof("New websocket %p\n", ws)
 	if len(r.players) < 4 {
 		p := playerConn{
 			name:   name,
@@ -119,7 +119,7 @@ func (r *room) run() {
 	}
 
 	// start the game
-	log.Printf("Starting the game")
+	log.Info("Starting the game")
 	for _, p := range r.players {
 		//TODO: check the players
 		p.start()
@@ -139,7 +139,7 @@ func (r *room) run() {
 		case <-r.updateAll:
 			r.updateAllPlayers()
 		case pNumber := <-r.stop:
-			log.Printf("Player #%v stopped the game", pNumber)
+			log.Infof("Player #%v stopped the game", pNumber)
 			r.stopAllPlayers(pNumber)
 		case pMessage := <-r.message:
 			r.sendMessageToAllPlayers(pMessage)
@@ -260,9 +260,9 @@ func generateUrl() string {
 		return "AAA"
 	}
 	var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
-	url := make([]byte, urlLength)
+	url := make([]byte, UrlLength)
 	for i := range url {
-		url[i] = charset[rnd.Intn(len(charset))]
+		url[i] = Charset[rnd.Intn(len(Charset))]
 	}
 	return string(url)
 }
@@ -270,7 +270,7 @@ func generateUrl() string {
 func (s statement) actionByPlayer(player int, action *gameAction) gameAction {
 	player = action.Player
 	switch action.Action {
-	case skipCommand:
+	case skipCommand: // fixme
 		return gameAction{
 			Player: player,
 			Action: skipCommand,
