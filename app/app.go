@@ -38,7 +38,8 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 	apperr.Check(err)
 	log.Infof(playerName)
 
-	var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
+	//var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
+	var homeTempl = template.Must(template.ParseFiles("view/index.html"))
 	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	homeTempl.Execute(w, data)
 }

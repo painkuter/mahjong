@@ -1,6 +1,6 @@
 module mahjong
 
-// go: no requirements found in glide.lock
+go 1.15
 
 require (
 	github.com/codemodus/parth v1.1.3

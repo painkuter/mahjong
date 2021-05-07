@@ -47,25 +47,36 @@
 * message [message] //just text message
 
 #### TODO
-* Name generator
-* spectate the room
-* print YOUR TURN +
-* ping-pong players
-* run room in goroutine +
-* close ws after game
-* makefile
-* save history to DB
-* use cookies for identification 
-* connect to the room by URL
-* error's pages
-* separate logger for dev and prod
-* save last turn
-* remove room from list after player give up
-* monitoring
-* create DB for statements, games and players saving
+* Design
+  * драконы
+* FE
+  * наполнение gameData с бэкенда
+  * таймер
+  * комбинации в открытую (дискард общий, в комбинации отдельно перед каждым)
+  * остальные игроки
+* BE
+  * Name generator 
+  * spectate the room
+  * print YOUR TURN +
+  * ping-pong players
+  * run room in goroutine +
+  * close ws after game
+  * makefile
+  * save history to DB
+  * use cookies for identification 
+  * connect to the room by URL
+  * error's pages
+  * separate logger for dev and prod
+  * save last turn
+  * remove room from list after player give up
+  * monitoring
+  * create DB for statements, games and players saving
 
 Подключение 
 0. /room -> room_name
 0. /ws?room=room_name
 0. После подключения 4х игроков начинается игра - сообщение "start"-type
 0. Пересылка всего состояния - "game"-type
+
+### Описание
+Отношение сторон для браузера фиксированное - 16\9

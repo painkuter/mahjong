@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="cache-control" content="no-cache"/>
+    <meta content="no-cache" http-equiv="cache-control"/>
     <title>Index</title>
     <style>
         #your_turn {
@@ -212,17 +212,17 @@
 <p>Room name: <a href="/room/{{.RoomName}}">{{.RoomName}}</a></p>
 <p>Players number: {{.Players}}</p>
 
-<input type="text" id="command" name="command" value="">
+<input id="command" name="command" type="text" value="">
 <button id="send_command">Send</button>
 
 <br/>
 
-<input type="text" id="message" name="message" value="">
+<input id="message" name="message" type="text" value="">
 <button id="send_message">Send message</button>
 
 <br>
 
-<textarea id="log" rows="10" cols="50"></textarea>
+<textarea cols="50" id="log" rows="10"></textarea>
 <h3>Players List:</h3>
 <ul id="players_list">
 </ul>
@@ -236,7 +236,7 @@
 <br>
 <h1 id="your_turn">YOUR TURN</h1>
 <h3>Current tile:</h3><br>
-<button id="current_tile" class="tile"></button>
+<button class="tile" id="current_tile"></button>
 
 <br>
 
