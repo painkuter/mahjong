@@ -8,27 +8,32 @@
 <script src="../static/game/room.js" defer></script>
 <script src="../static/game/preparation.js" defer></script>
 <script type="text/javascript" src="../static/tiles.json"></script>
+<!--debug code. remove before release-->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<!---->
 <body>
 <script type="text/javascript">
     let gameData = {
     "status":"game",
     "body":{
       "players":{
-        "0":{
+        "1":{
           "hand":null,
           "discard":[],
           "open":null,
           "current_tile":"",
           "wind":1
         },
-        "1":{
+        "2":{
           "hand":null,
           "discard":[],
           "open":null,
           "current_tile":"",
           "wind":2
         },
-        "2":{
+        "3":{
           "hand":null,
           "discard":[],
           "open":null,
@@ -72,6 +77,9 @@
       "reserve":null
       }
     };
-  </script>
+
+    const host = "{{.Host}}";
+</script>
+<label for="log"></label><textarea cols="150" id="log" rows="10"></textarea>
 </body>
 </html>

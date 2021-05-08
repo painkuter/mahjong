@@ -40,7 +40,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 
 	//var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
 	var homeTempl = template.Must(template.ParseFiles("view/index.html"))
-	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	data := RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	homeTempl.Execute(w, data)
 }
 
@@ -56,7 +56,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	data := roomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	data := RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	response, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
@@ -86,20 +86,8 @@ func ActiveRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{
-		HandshakeTimeout: time.Second,
-		ReadBufferSize:   1024,
-		WriteBufferSize:  1024,
-		CheckOrigin:      websocket.IsWebSocketUpgrade,
-	}
-	ws, err := upgrader.Upgrade(w, r, http.Header{"Set-Cookie": {"sessionID=1234"}}) // fixme
-	if e, ok := err.(websocket.HandshakeError); ok {
-		log.Infof("Websocket handshake error: %s", e.Error())
-		http.Error(w, "Not a websocket handshake", 400)
-		return
-	} else if err != nil {
-		log.Error(err)
-		http.Error(w, "Runtime error", 500)
+	ws, err := NewWSConnection(w, r)
+	if err != nil {
 		return
 	}
 
@@ -113,6 +101,27 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Player %s has joined to room %s", playerName, roomURL)
 
 	activeRooms[roomURL].AddPlayer(playerName, ws)
+}
+
+func NewWSConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+	upgrader := websocket.Upgrader{
+		HandshakeTimeout: time.Second,
+		ReadBufferSize:   1024,
+		WriteBufferSize:  1024,
+		CheckOrigin:      websocket.IsWebSocketUpgrade,
+	}
+	ws, err := upgrader.Upgrade(w, r, http.Header{"Set-Cookie": {"sessionID=1234"}}) // fixme
+	if e, ok := err.(websocket.HandshakeError); ok {
+		log.Infof("Websocket handshake error: %s", e.Error())
+		http.Error(w, "Not a websocket handshake", 400)
+		return nil, e
+	} else if err != nil {
+		log.Error(err)
+		http.Error(w, "Runtime error", 500)
+		return nil, e
+	}
+
+	return ws, nil
 }
 
 func LiveHandler(w http.ResponseWriter, r *http.Request) {

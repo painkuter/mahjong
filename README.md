@@ -12,6 +12,9 @@
     /room/[URL]
     /new-room
     /rooms-list    
+
+#### WS requests
+    game
     
 #### Testing
     go test ./...

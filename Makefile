@@ -1,2 +1,2 @@
-single:
-    go build cmd/single/main.go
+#single:
+#    go build cmd/single/main.go

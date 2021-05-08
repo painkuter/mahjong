@@ -53,7 +53,7 @@ type gameAction struct {
 
 type pass map[int]bool
 
-type roomResponse struct {
+type RoomResponse struct {
 	Host     string `json:"host"`
 	RoomName string `json:"room_name"`
 	Players  int    `json:"players"`

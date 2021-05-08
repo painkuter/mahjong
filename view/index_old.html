@@ -13,12 +13,12 @@
     <script>
         $(document).ready(function () {
             //TODO: get room URL
-            var conn;
-            var command = $("#command");
-            var log = $("#log");
+            let conn;
+            const command = $("#command");
+            const log = $("#log");
             //var name = window.prompt("Your name");
-            var name = "pName";
-            var host = "{{.Host}}";
+            const name = "pName";
+            const host = "{{.Host}}";
             if (window["WebSocket"]) {//supported device list?
                 roomURL = window.location.href.substring(window.location.href.indexOf(host) + host.length + 5); //rewrite it
                 console.log(roomURL);

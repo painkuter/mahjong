@@ -33,7 +33,7 @@ func main() {
 	l := log.InitLogging()
 	defer l.Close()
 
-	r := app.NewRoom()
+	newRoom := app.NewRoom()
 	go func() {
 		http.HandleFunc("/ws", app.WsHandler)
 		http.HandleFunc("/room", app.ActiveRoom)
@@ -50,16 +50,16 @@ func main() {
 
 	//fmt.Println("Creating clients")
 	// Convert http://127.0.0.1 to ws://127.0.0.1
-	//u := "ws" + strings.TrimPrefix("http://0.0.0.0:8079", "http")
-	//u := "ws" + strings.TrimPrefix(s.URL, "http")
-	u := "ws://" + config.ADDR
+	//host := "ws" + strings.TrimPrefix("http://0.0.0.0:8079", "http")
+	//host := "ws" + strings.TrimPrefix(s.URL, "http")
+	host := "ws://" + config.ADDR
 
 	messageCh := make([]chan string, 4)
 	var testPlayers testCon
 	for i := 0; i < 3; i++ {
 		messageCh[i] = make(chan string, 10)
 		// Connect to the server
-		url := u + "/ws?room=" + r.Url + "&name=player_" + strconv.Itoa(i)
+		url := host + "/ws?room=" + newRoom.Url + "&name=player_" + strconv.Itoa(i)
 		log.Info(url)
 		ws, _, err := websocket.DefaultDialer.Dial(url, nil)
 		apperr.Check(err)
@@ -75,7 +75,7 @@ func main() {
 	log.Info("Single game ready. Waiting for 4th played connection")
 
 	for {
-		testPlayers.makeTurn(r.Statement().Step, r.Statement().Players[r.Statement().Step])
+		testPlayers.makeTurn(newRoom.Statement().Step, newRoom.Statement().Players[newRoom.Statement().Step])
 		time.Sleep(100 * time.Millisecond)
 	}
 }
