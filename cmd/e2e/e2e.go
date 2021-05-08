@@ -33,7 +33,7 @@ func main() {
 			http.ServeFile(w, r, r.URL.Path[1:])
 		})
 	}()
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if err := http.ListenAndServe(config.ADDR, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}

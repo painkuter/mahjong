@@ -7,7 +7,6 @@ let type = "WebGL";
 if (!PIXI.utils.isWebGLSupported()) {
     type = "canvas"
     alert('canvas');
-
 }
 
 if (!window["WebSocket"]) {
@@ -70,20 +69,10 @@ function onStop(message) {
     console.debug( "player " + message.body + " gave up");
 }
 
-function log(text) {
-    window.logger.innerHTML += text+'\n';
-    console.log(text);
-}
-
 function onGame(message){
-    console.debug(message);
-    console.debug(gameData);
     gameData = message;
-    // log("message"+JSON.stringify(message));
-    // log("gamedata"+JSON.stringify(gameData));
     PIXI.loader
         .add("mahjongTiles", "/static/images/tiles-mahjong.jpg")
         .load(setup);
-    console.debug("game started");
 }
 

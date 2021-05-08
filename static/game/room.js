@@ -1,6 +1,3 @@
-// alert('from room.js')
-
-
 function createTile(texture, rect, name) {
 
     let sprite = new PIXI.Sprite(new PIXI.Texture(texture, rect, name));
@@ -14,7 +11,6 @@ function createTile(texture, rect, name) {
 
 function setup() {
     load();
-    console.debug("here");
     let me = getMe();
     app.stage.addChild(me);
     //Render the stage
@@ -23,38 +19,39 @@ function setup() {
 
 function getMe() {
     let me = new PIXI.Container();
-    console.debug("hand "+gameData.body.players["100"].hand);
-    for (var i in gameData.body.players["100"].hand) {
-        var tile = tileStack[gameData.body.players["100"].hand[i]];
+    for (var i in getMyData().hand) {
+        var tile = tileStack[getMyData().hand[i]];
         tile.sprite.interactive = true;
         tile.sprite.buttonMode = true;
         tile.sprite.on("pointerdown", onSelect);
-        console.debug("tile "+tile)
         myStack.push(tile);
     }
     myStack.sort(handSort);
 
-    let discard = getDiscard(gameData.body.players["100"]); //
-    console.debug(discard);
+    let discard = getDiscard(getMyData()); //
     me.addChild(discard);
-    console.debug("myStack")
-    console.debug(myStack)
     for (var i in myStack) {
         myStack[i].sprite.x = (myStack[i].sprite.width + 2) * i;
-        myStack[i].sprite.y = discard.height + 100;
+        if (getMyData().discard.length > 0) {
+            myStack[i].sprite.y = discard.height + 100;
+        }
         me.addChild(myStack[i].sprite);
     }
 
-    discard.position.x = me.width / 2 - discard.width / 2;
-
+    if (getMyData().discard.length > 0) {
+        discard.position.x = me.width / 2 - discard.width / 2;
+    }
     me.position.x = app.renderer.view.width / 2 - me.width / 2;
     me.position.y = app.renderer.view.height - (me.height + 10);
 
     return me;
 }
 
+function getMyData() {
+    return gameData.body.players["100"]
+}
+
 function getDiscard(player) {
-    console.debug("player"+player);
     let discard = new PIXI.Container();
     var col = 0;
     var row = 0;
@@ -74,7 +71,6 @@ function getDiscard(player) {
             col++;
         }
     }
-
     return discard;
 }
 
@@ -96,7 +92,6 @@ function onSelect() {
 function load() {
     for (const index in tiles_data.mahjong_tiles) {
         const value = tiles_data.mahjong_tiles[index];
-        console.debug(value)
         for (let i = 1; i <= 4; i++) {
             tileStack[index + "_" + i] = createTile(PIXI.loader.resources.mahjongTiles.texture, new PIXI.Rectangle(value.x, value.y, value.width, value.height), index + "_" + i);
         }
@@ -104,8 +99,6 @@ function load() {
 }
 
 function handSort(a, b) {
-    // console.log(a.name);
-    // console.log(b.name);
     if (a.name > b.name) {
         return 1;
     }
