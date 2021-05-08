@@ -105,7 +105,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 func NewWSConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	upgrader := websocket.Upgrader{
-		HandshakeTimeout: time.Second,
+		HandshakeTimeout: time.Second * 15,
 		ReadBufferSize:   1024,
 		WriteBufferSize:  1024,
 		CheckOrigin:      websocket.IsWebSocketUpgrade,

@@ -13,6 +13,9 @@ function setup() {
     load();
     let me = getMe();
     app.stage.addChild(me);
+    app.stage.addChild(skipButton);
+    app.stage.addChild(getButton);
+
     //Render the stage
     app.renderer.render(app.stage);
 }

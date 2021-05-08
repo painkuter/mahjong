@@ -10,9 +10,12 @@ import (
 	"github.com/gorilla/websocket"
 
 	"mahjong/app"
+	"mahjong/app/common"
 	"mahjong/app/common/log"
 	"mahjong/app/config"
 )
+
+var ws *websocket.Conn
 
 func main() {
 
@@ -33,6 +36,7 @@ func main() {
 			http.ServeFile(w, r, r.URL.Path[1:])
 		})
 	}()
+
 	time.Sleep(100 * time.Millisecond)
 	if err := http.ListenAndServe(config.ADDR, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
@@ -46,10 +50,16 @@ func room(w http.ResponseWriter, r *http.Request) {
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
-	ws, err := app.NewWSConnection(w, r)
+	_, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
+	//fmt.Println(string(request))
+	ws, err = app.NewWSConnection(w, r)
+	if err != nil {
+		log.Fatal(err)
+	}
+	go common.Receive(ws)
 
 	f, err := os.Open("./examples/game.json")
 	if err != nil {
@@ -62,7 +72,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = ws.WriteMessage(websocket.TextMessage, buf)
-	//_, err = w.Write([]byte(buf))
 	if err != nil {
 		log.Fatal(err)
 	}

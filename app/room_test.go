@@ -48,7 +48,7 @@ func TestRoom_Run(t *testing.T) {
 			t.Fatalf("%v", err)
 		}
 		testPlayers = append(testPlayers, ws)
-		go common.Receive(ws, messageCh[i])
+		go common.ReceiveTo(ws, messageCh[i])
 		time.Sleep(100 * time.Millisecond)
 	}
 	log.Printf("Game started")

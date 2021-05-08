@@ -68,7 +68,7 @@ func main() {
 			log.Fatalf("%v", err)
 		}
 		testPlayers.conn = append(testPlayers.conn, ws)
-		go common.Receive(ws, messageCh[i])
+		go common.ReceiveTo(ws, messageCh[i])
 		time.Sleep(100 * time.Millisecond)
 	}
 	time.Sleep(time.Millisecond * 100) // waiting for all players
