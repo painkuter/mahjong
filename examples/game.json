@@ -1,35 +1,32 @@
 {
-  "status":"game",
-  "body":{
-    "players":{
-      "1":{
-        "hand":null,
-        "discard":[],
-        "open":null,
-        "current_tile":"",
-        "wind":1
+  "status": "game",
+  "body": {
+    "players": {
+      "1": {
+        "hand": null,
+        "discard": [],
+        "open": null,
+        "current_tile": "",
+        "wind": 1
       },
-      "2":{
-        "hand":null,
-        "discard":[],
-        "open":null,
-        "current_tile":"",
-        "wind":2
+      "2": {
+        "hand": null,
+        "discard": [],
+        "open": null,
+        "current_tile": "",
+        "wind": 2
       },
-      "3":{
-        "hand":null,
-        "discard":[],
-        "open":null,
-        "current_tile":"",
-        "wind":3
+      "3": {
+        "hand": null,
+        "discard": [],
+        "open": null,
+        "current_tile": "",
+        "wind": 3
       },
-      "100":{
-        "hand":[
+      "100": {
+        "hand": [
           "1_8_2",
           "1_8_1",
-          "1_7_2",
-          "1_7_4",
-          "1_7_3",
           "3_9_2",
           "3_9_4",
           "1_1_2",
@@ -39,16 +36,28 @@
           "2_8_4",
           "1_9_1"
         ],
-        "discard":[
+        "discard": [
+          "1_5_4",
+          "1_5_3",
+          "1_5_2"
         ],
-        "open":null,
-        "current_tile":"",
-        "wind":4
+        "open": [
+          {
+            "meld": "kong",
+            "value": [
+              "2_7_2",
+              "2_7_4",
+              "2_7_3"
+            ]
+          }
+        ],
+        "current_tile": "",
+        "wind": 4
       }
     },
-    "wall":null,
-    "wind":1,
-    "step":1,
-    "reserve":null
+    "wall": null,
+    "wind": 1,
+    "step": 1,
+    "reserve": null
   }
 }

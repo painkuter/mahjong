@@ -92,11 +92,11 @@ function onSelect() {
     }
 }
 
-function load() {
+function load() { // грузит картинки тайлов в память
     for (const index in tiles_data.mahjong_tiles) {
         const value = tiles_data.mahjong_tiles[index];
         for (let i = 1; i <= 4; i++) {
-            tileStack[index + "_" + i] = createTile(PIXI.loader.resources.mahjongTiles.texture, new PIXI.Rectangle(value.x, value.y, value.width, value.height), index + "_" + i);
+            tileStack[index + "_" + i] = createTile(PIXI.Loader.shared.resources.mahjongTiles.texture, new PIXI.Rectangle(value.x, value.y, value.width, value.height), index + "_" + i);
         }
     }
 }
@@ -109,3 +109,73 @@ function handSort(a, b) {
         return -1;
     }
 }
+
+function processDblClick(point) { // dblclick moves tile to discard
+    for (const i in myStack) {
+        if (myStack[i].sprite.containsPoint(point)) {
+            // TODO disable moving tiles to discard
+            moveToDiscard(myStack[i].name)
+        }
+    }
+}
+
+
+function onAction(message) {
+    console.debug(message)
+    console.debug(message.body.player)
+    switch (message.body.action) {
+        case "announce":
+            onAnnounce(message.body, message.body.player);
+            break
+        case "discard":
+            onDiscard(message.body, message.body.player);
+            break
+        case "get_tile":
+            onGetTile(message.body, message.body.player);
+            break
+        case "skip":
+            onSkip(message.body, message.body.player);
+            break
+    }
+}
+
+function onAnnounce(action, playerID) {
+    for (var i in action.value) {
+        gameData.body.players[playerID].open.push(action.value[i]);
+    }
+    showOpenTiles(playerID)
+}
+
+function showOpenTiles(playerID) {
+    console.debug("showOpenTiles")
+    var col = 0;
+    var offset = 0; // сдвиг относительно предыдущей комбинации
+
+    for (var i in gameData.body.players[playerID].open) {
+        for (var j in gameData.body.players[playerID].open[i].value) {
+            console.debug(gameData.body.players[playerID].open[i].value[j])
+
+            var tile = tileStack[gameData.body.players[playerID].open[i].value[j]];
+            tile.sprite.width = 40;
+            tile.sprite.height = 56;
+            tile.sprite.x = 300 + (tile.sprite.width + 2) * col + offset;
+            tile.sprite.y = 300 + (tile.sprite.height + 2);
+            openTiles[playerID].addChild(tile.sprite);
+            col++;
+        }
+        offset += 30
+    }
+}
+
+function onDiscard(action, playerID) {
+
+}
+
+function onGetTile(action, playerID) {
+
+}
+
+function onSkip(action, playerID) {
+
+}
+

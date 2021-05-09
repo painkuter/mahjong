@@ -75,4 +75,11 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	time.Sleep(time.Second)
+
+	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"100", "action":"announce","meld":"chow", "value":["3_1_1","3_2_1","3_3_2"]}}`))
+	if err != nil {
+		log.Fatal(err)
+	}
 }

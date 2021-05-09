@@ -8,6 +8,7 @@
 <script src="../static/game/room.js" defer></script>
 <script src="../static/game/menu.js" defer></script>
 <script src="../static/game/preparation.js" defer></script>
+<script src="../static/game/send_message.js" defer></script>
 <script type="text/javascript" src="../static/tiles.json"></script>
 <!--debug code. remove before release-->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
@@ -16,72 +17,9 @@
 <!---->
 <body>
 <script type="text/javascript">
-    let gameData;
-    /* let gameData = {
-     "status":"game",
-     "body":{
-       "players":{
-         "1":{
-           "hand":null,
-           "discard":[],
-           "open":null,
-           "current_tile":"",
-           "wind":1
-         },
-         "2":{
-           "hand":null,
-           "discard":[],
-           "open":null,
-           "current_tile":"",
-           "wind":2
-         },
-         "3":{
-           "hand":null,
-           "discard":[],
-           "open":null,
-           "current_tile":"",
-           "wind":3
-         },
-         "100":{
-           "hand":[
-             "1_9_2",
-             "3_3_3",
-             "3_1_3",
-             "3_4_1",
-             "4_2_3",
-             "3_9_2",
-             "3_9_4",
-             "1_1_2",
-             "1_8_4",
-             "4_4_1",
-             "2_8_1",
-             "2_8_4",
-             "1_9_1"
-           ],
-           "discard":[
-             "1_9_3",
-             "3_3_2",
-             "3_1_2",
-             "3_4_4",
-             "3_2_2",
-             "1_2_2",
-             "3_3_1",
-             "2_6_1"
-           ],
-           "open":null,
-           "current_tile":"",
-           "wind":4
-         }
-       },
-       "wall":null,
-       "wind":1,
-       "step":1,
-       "reserve":null
-       }
-     };
- */
     const host = "{{.Host}}";
 </script>
+<div id="game"></div>
 <label for="log"></label><textarea cols="150" id="log" rows="10"></textarea>
 </body>
 </html>

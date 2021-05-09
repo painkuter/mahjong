@@ -1,8 +1,8 @@
 // skip
 
-var textureSkipButton = PIXI.Texture.fromImage('static/images/skip.png');
-var textureSkipButtonDown = PIXI.Texture.fromImage('static/images/skip_on.png');
-var textureSkipButtonOver = PIXI.Texture.fromImage('static/images/skip.png');
+var textureSkipButton = PIXI.Texture.from('static/images/skip.png');
+var textureSkipButtonDown = PIXI.Texture.from('static/images/skip_on.png');
+var textureSkipButtonOver = PIXI.Texture.from('static/images/skip.png');
 
 var skipButton = new PIXI.Sprite(textureSkipButton);
 skipButton.buttonMode = true;
@@ -60,34 +60,19 @@ function onButtonOut() {
     this.texture = textureSkipButton;
 }
 
-function sendSkip(){
-    // console.debug("skip")
-    const turn = {
-        action: "skip",
-        meld: "",
-        value: []
-    };
-    const wsMessage = {
-        status: "action",
-        body: turn
-    };
-    let req = JSON.stringify(wsMessage)
-    console.debug(req)
-    conn.send(req);
-}
-
 // get
 
-var textureGetButton = PIXI.Texture.fromImage('static/images/get.png');
-var textureGetButtonDown = PIXI.Texture.fromImage('static/images/get_on.png');
-var textureGetButtonOver = PIXI.Texture.fromImage('static/images/get.png');
+var textureGetButton = PIXI.Texture.from('static/images/get.png');
+var textureGetButtonDown = PIXI.Texture.from('static/images/get_on.png');
+var textureGetButtonOver = PIXI.Texture.from('static/images/get.png');
 
 var getButton = new PIXI.Sprite(textureGetButton);
 getButton.buttonMode = true;
 
 getButton.anchor.set(0.5);
 getButton.x = 200;
-getButton.y = 250;
+getButton.y = 300;
+getButton.db
 
 // make the button interactive...
 getButton.interactive = true;
@@ -134,19 +119,4 @@ function onGetButtonOut() {
         return;
     }
     this.texture = textureGetButton;
-}
-
-function sendGetMessage(){
-    const turn = {
-        action: "get_tile",
-        meld: "",
-        value: []
-    };
-    const wsMessage = {
-        status: "action",
-        body: turn
-    };
-    let req = JSON.stringify(wsMessage)
-    console.debug(req)
-    conn.send(req);
 }
