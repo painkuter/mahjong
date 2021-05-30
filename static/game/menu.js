@@ -8,7 +8,7 @@ var skipButton = new PIXI.Sprite(textureSkipButton);
 skipButton.buttonMode = true;
 
 skipButton.anchor.set(0.5);
-skipButton.x = 200;
+skipButton.x = 1000;
 skipButton.y = 200;
 
 // make the button interactive...
@@ -70,7 +70,7 @@ var getButton = new PIXI.Sprite(textureGetButton);
 getButton.buttonMode = true;
 
 getButton.anchor.set(0.5);
-getButton.x = 200;
+getButton.x = 1000;
 getButton.y = 300;
 getButton.db
 

@@ -7,23 +7,27 @@
         "discard": [],
         "open": null,
         "current_tile": "",
-        "wind": 1
+        "wind": 1,
+        "name": "Player_1"
       },
       "2": {
         "hand": null,
         "discard": [],
         "open": null,
         "current_tile": "",
-        "wind": 2
+        "wind": 2,
+        "name": "Player_2"
       },
       "3": {
         "hand": null,
         "discard": [],
         "open": null,
         "current_tile": "",
-        "wind": 3
+        "wind": 3,
+        "name": "Player_3"
       },
       "100": {
+        "name": "Player_100",
         "hand": [
           "1_8_2",
           "1_8_1",

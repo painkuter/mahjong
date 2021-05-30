@@ -12,6 +12,7 @@ function createTile(texture, rect, name) {
 function setup() {
     load();
     let me = getMe();
+    containers[100] = me
     app.stage.addChild(me);
     app.stage.addChild(skipButton);
     app.stage.addChild(getButton);
@@ -121,8 +122,6 @@ function processDblClick(point) { // dblclick moves tile to discard
 
 
 function onAction(message) {
-    console.debug(message)
-    console.debug(message.body.player)
     switch (message.body.action) {
         case "announce":
             onAnnounce(message.body, message.body.player);
@@ -140,26 +139,38 @@ function onAction(message) {
 }
 
 function onAnnounce(action, playerID) {
-    for (var i in action.value) {
-        gameData.body.players[playerID].open.push(action.value[i]);
+    let announce = {
+        meld: action.meld,
+        value: []
+    };
+    for (let i in action.value) {
+        announce.value.push(action.value[i]);
     }
+    if (gameData.body.players[playerID].open == null) {
+        gameData.body.players[playerID].open = [];
+    }
+    gameData.body.players[playerID].open.push(announce);
+
     showOpenTiles(playerID)
 }
 
 function showOpenTiles(playerID) {
-    console.debug("showOpenTiles")
-    var col = 0;
-    var offset = 0; // сдвиг относительно предыдущей комбинации
+    let col = 0;
+    let offset = 0; // сдвиг относительно предыдущей комбинации
 
-    for (var i in gameData.body.players[playerID].open) {
-        for (var j in gameData.body.players[playerID].open[i].value) {
-            console.debug(gameData.body.players[playerID].open[i].value[j])
 
-            var tile = tileStack[gameData.body.players[playerID].open[i].value[j]];
-            tile.sprite.width = 40;
-            tile.sprite.height = 56;
-            tile.sprite.x = 300 + (tile.sprite.width + 2) * col + offset;
-            tile.sprite.y = 300 + (tile.sprite.height + 2);
+    // console.debug(playerID)
+    for (let i in gameData.body.players[playerID].open) {
+        for (let j in gameData.body.players[playerID].open[i].value) {
+
+            let tile = tileStack[gameData.body.players[playerID].open[i].value[j]];
+            if  (tile == null) {
+                console.error("Tile not found " + gameData.body.players[playerID].open[i].value[j]);
+            }
+            tile.sprite.width = OPEN_TILE_WIDTH;
+            tile.sprite.height = OPEN_TILE_HEIGHT;
+            tile.sprite.x = /*openPositionByPlayerID[playerID].x +*/ (tile.sprite.width + 2) * col + offset;
+            tile.sprite.y = /*openPositionByPlayerID[playerID].y +*/ (tile.sprite.height + 2);
             openTiles[playerID].addChild(tile.sprite);
             col++;
         }
@@ -177,5 +188,24 @@ function onGetTile(action, playerID) {
 
 function onSkip(action, playerID) {
 
+}
+
+const openPositionByPlayerID = {
+    "1": {
+        x: 100,
+        y: 400
+    },
+    "2": {
+        x: 600,
+        y: 100
+    },
+    "3": {
+        x: 500,
+        y: 0
+    },
+    "100": {
+        x: 300,
+        y: 300
+    },
 }
 

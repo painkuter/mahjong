@@ -78,7 +78,19 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	time.Sleep(time.Second)
 
-	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"100", "action":"announce","meld":"chow", "value":["3_1_1","3_2_1","3_3_2"]}}`))
+	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"100", "action":"announce","meld":"chow", "value":["4_1_1","4_2_1","4_3_2"]}}`))
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"1", "action":"announce","meld":"chow", "value":["1_1_1","1_2_1","1_3_2"]}}`))
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"2", "action":"announce","meld":"chow", "value":["2_1_1","2_2_1","2_3_1"]}}`))
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"3", "action":"announce","meld":"chow", "value":["3_1_1","3_2_1","3_3_2"]}}`))
 	if err != nil {
 		log.Fatal(err)
 	}
