@@ -60,13 +60,13 @@ function getDiscard(player) {
     var col = 0;
     var row = 0;
     for (var i in player.discard) {
-        var tile = tileStack[player.discard[i]];
+        var discardTile = tileStack[player.discard[i]];
 
-        tile.sprite.width = 40;
-        tile.sprite.height = 56;
-        tile.sprite.x = (tile.sprite.width + 2) * col;
-        tile.sprite.y = (tile.sprite.height + 2) * row;
-        discard.addChild(tile.sprite);
+        discardTile.sprite.width = OPEN_TILE_WIDTH;
+        discardTile.sprite.height = OPEN_TILE_HEIGHT;
+        discardTile.sprite.x = (discardTile.sprite.width + 2) * col;
+        discardTile.sprite.y = (discardTile.sprite.height + 2) * row;
+        discard.addChild(discardTile.sprite);
 
         if (i % 5 == 0 && i > 0) {
             col = 0;
@@ -151,10 +151,10 @@ function onAnnounce(action, playerID) {
     }
     gameData.body.players[playerID].open.push(announce);
 
-    showOpenTiles(playerID)
+    drawOpenTiles(playerID)
 }
 
-function showOpenTiles(playerID) {
+function drawOpenTiles(playerID) {
     let col = 0;
     let offset = 0; // сдвиг относительно предыдущей комбинации
 
@@ -179,7 +179,14 @@ function showOpenTiles(playerID) {
 }
 
 function onDiscard(action, playerID) {
-
+    console.debug("Discard")
+    let discard = tileStack[action.value]
+    discard.sprite.x = 0
+    discard.sprite.y = 0
+    discard.sprite.width =OPEN_TILE_WIDTH*1.5
+    discard.sprite.height = OPEN_TILE_HEIGHT*1.5
+    discardContainer.addChild(discard.sprite)
+    app.renderer.render(app.stage);
 }
 
 function onGetTile(action, playerID) {
@@ -187,9 +194,9 @@ function onGetTile(action, playerID) {
 }
 
 function onSkip(action, playerID) {
-
 }
 
+/*
 const openPositionByPlayerID = {
     "1": {
         x: 100,
@@ -208,4 +215,5 @@ const openPositionByPlayerID = {
         y: 300
     },
 }
+*/
 

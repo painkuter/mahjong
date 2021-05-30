@@ -20,7 +20,7 @@ const WIDTH = 1600
 const HEIGHT = 900
 const BORDER_PADDING_X = 80
 const BORDER_PADDING_Y = 110
-const  OPEN_TILE_WIDTH = 40
+const OPEN_TILE_WIDTH = 40
 const OPEN_TILE_HEIGHT = 56
 
 // создание игровой зоны PIXI
@@ -52,7 +52,7 @@ let tileStack = {}; // все тайлы
 let myStack = []; // мой стек
 let gameData; // общее состояние игры, известное текущему игроку
 
-let playerIDs = ["1","2","3","100"]
+let playerIDs = ["1", "2", "3", "100"]
 
 
 let openTiles = {
@@ -62,18 +62,28 @@ let openTiles = {
     "3": new PIXI.Sprite(PIXI.Texture.WHITE)
 };
 
-let containers = buildContainers(playerIDs)
+let containers = buildPlayerContainers(playerIDs)
+let discardContainer = new PIXI.Container()
+discardContainer.x = 300
+discardContainer.y = 200
+
+const discardLabel = new PIXI.Text("Discard");
+discardLabel.x = 50;
+discardLabel.y = 100;
+discardContainer.addChild(discardLabel)
+
+app.stage.addChild(discardContainer)
 
 containers["100"].x = 0
-containers["100"].y = HEIGHT*0.66
+containers["100"].y = HEIGHT * 0.66
 
 containers["1"].x = BORDER_PADDING_X
 containers["1"].y = BORDER_PADDING_Y
 
-containers["2"].x = (WIDTH - BORDER_PADDING_X - (OPEN_TILE_WIDTH+2)*3)/2
+containers["2"].x = (WIDTH - BORDER_PADDING_X - (OPEN_TILE_WIDTH + 2) * 3) / 2
 containers["2"].y = 0
 
-containers["3"].x = WIDTH - BORDER_PADDING_X - (OPEN_TILE_WIDTH+2)*3
+containers["3"].x = WIDTH - BORDER_PADDING_X - (OPEN_TILE_WIDTH + 2) * 3
 containers["3"].y = BORDER_PADDING_Y
 
 setOpenTiles(containers)
@@ -135,9 +145,9 @@ app.view.addEventListener("dblclick", (e) => {
     processDblClick(global)
 });
 
-function buildContainers (playerIDs){
+function buildPlayerContainers(playerIDs) {
     let containers = {}
-    for (let k in playerIDs){
+    for (let k in playerIDs) {
         containers[playerIDs[k]] = new PIXI.Container()
     }
     return containers
@@ -161,7 +171,7 @@ function setOpenTiles(containers) {
     }
 }
 
-function setContainers(containers){
+function setContainers(containers) {
     for (let k in containers) {
         app.stage.addChild(containers[k])
     }
