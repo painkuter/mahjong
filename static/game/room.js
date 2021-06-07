@@ -164,7 +164,7 @@ function drawOpenTiles(playerID) {
         for (let j in gameData.body.players[playerID].open[i].value) {
 
             let tile = tileStack[gameData.body.players[playerID].open[i].value[j]];
-            if  (tile == null) {
+            if (tile == null) {
                 console.error("Tile not found " + gameData.body.players[playerID].open[i].value[j]);
             }
             tile.sprite.width = OPEN_TILE_WIDTH;
@@ -179,12 +179,28 @@ function drawOpenTiles(playerID) {
 }
 
 function onDiscard(action, playerID) {
-    console.debug("Discard")
+    console.debug("Discard" + action.value);
+
+    let smallDiscardWidth = OPEN_TILE_WIDTH * 0.8
+    let smallDiscardHeight = OPEN_TILE_HEIGHT * 0.8
+
+    let discardSize = discardContainer.children.length
+
+    // console.debug("size" + discardSize)
+    // уменьшаем предыдущий тайл в дискарде
+    if (discardSize > 0) {
+        let lastTile = discardContainer.getChildAt(discardSize - 1)
+        lastTile.width = smallDiscardWidth
+        lastTile.height = smallDiscardHeight
+    }
+
+console.debug("x_offset"+ (discardSize % DISCARD_CALS))
+console.debug("y_offset"+ ~~(discardSize / DISCARD_CALS))
     let discard = tileStack[action.value]
-    discard.sprite.x = 0
-    discard.sprite.y = 0
-    discard.sprite.width =OPEN_TILE_WIDTH*1.5
-    discard.sprite.height = OPEN_TILE_HEIGHT*1.5
+    discard.sprite.x = (smallDiscardWidth + 2) * (discardSize % DISCARD_CALS)
+    discard.sprite.y = (smallDiscardHeight + 2) * (~~(discardSize / DISCARD_CALS))
+    discard.sprite.width = OPEN_TILE_WIDTH * 1.5
+    discard.sprite.height = OPEN_TILE_HEIGHT * 1.5
     discardContainer.addChild(discard.sprite)
     app.renderer.render(app.stage);
 }

@@ -50,6 +50,7 @@
 * message [message] //just text message
 
 #### TODO
+* load e2e data from e2e/data jsons
 * Design
   * драконы
 * FE

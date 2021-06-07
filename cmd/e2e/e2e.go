@@ -46,7 +46,10 @@ func main() {
 func room(w http.ResponseWriter, r *http.Request) {
 	var homeTempl = template.Must(template.ParseFiles("./view/index.html"))
 	data := app.RoomResponse{Host: r.Host, RoomName: "AAA", Players: 4}
-	homeTempl.Execute(w, data)
+	err := homeTempl.Execute(w, data)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +64,24 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	go common.Receive(ws)
 
-	f, err := os.Open("./examples/game.json")
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/game_data.json"))
+	time.Sleep(time.Second)
+
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/announce_player_100.json"))
+
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/announce_player_1.json"))
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/announce_player_2.json"))
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/announce_player_3.json"))
+
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/discard.json"))
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/discard_2.json"))
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/discard_3.json"))
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/discard_4.json"))
+	writeWSMessage(getDataFromJSON("./examples/e2e_data/discard_5.json"))
+}
+
+func getDataFromJSON(fileName string) []byte {
+	f, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,32 +90,12 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return buf
+}
 
-	err = ws.WriteMessage(websocket.TextMessage, buf)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	time.Sleep(time.Second)
-
-	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"100", "action":"announce","meld":"chow", "value":["4_1_1","4_2_1","4_3_2"]}}`))
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"1", "action":"announce","meld":"chow", "value":["1_1_1","1_2_1","1_3_2"]}}`))
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"2", "action":"announce","meld":"chow", "value":["2_1_1","2_2_1","2_3_1"]}}`))
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"3", "action":"announce","meld":"chow", "value":["3_1_1","3_2_1","3_3_2"]}}`))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = ws.WriteMessage(websocket.TextMessage, []byte(`{"status":"action", "body":{"player":"99", "action":"discard", "value":["3_4_1"]}}`))
+func writeWSMessage(message []byte) {
+	time.Sleep(time.Millisecond * 200)
+	err := ws.WriteMessage(websocket.TextMessage, message)
 	if err != nil {
 		log.Fatal(err)
 	}

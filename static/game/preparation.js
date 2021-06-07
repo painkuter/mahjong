@@ -22,6 +22,7 @@ const BORDER_PADDING_X = 80
 const BORDER_PADDING_Y = 110
 const OPEN_TILE_WIDTH = 40
 const OPEN_TILE_HEIGHT = 56
+const DISCARD_CALS = 4
 
 // создание игровой зоны PIXI
 window.PIXI = PIXI;
@@ -43,7 +44,6 @@ conn.onclose = function (evt) {
 conn.onmessage = function (evt) {
     //parse data to JSON
     let message = JSON.parse(evt.data);
-    console.debug("Parsed");
     processMsg(message);
 }
 
