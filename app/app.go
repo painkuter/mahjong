@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	activeRooms = make(map[string]*room)
-	Room        *room // active room for new players TODO use mutex for room
+	Room *room // active room for new players TODO use mutex for room
+	app  *App
 )
 
 func roomHandler(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +67,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 func roomsListHandler(w http.ResponseWriter, r *http.Request) {
 	var rooms []string
-	for _, room := range activeRooms {
+	for _, room := range app.rooms {
 		rooms = append(rooms, room.Url)
 	}
 	var roomsTempl = template.Must(template.ParseFiles("view/rooms.html"))
@@ -95,12 +95,12 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Wrong room URL", 400)
 	}
-	playersCount := len(activeRooms[roomURL].players)
+	playersCount := len(app.rooms[roomURL].players)
 
 	playerName := getPlayerName(r, playersCount)
 	log.Infof("Player %s has joined to room %s", playerName, roomURL)
 
-	activeRooms[roomURL].AddPlayer(playerName, ws)
+	app.rooms[roomURL].AddPlayer(playerName, ws)
 }
 
 func NewWSConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
@@ -131,13 +131,14 @@ func LiveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Main() {
-	NewRoom()
+	app = NewApp()
+	_ = app
 	rh := http.RedirectHandler("/room", 301)
 	http.Handle("/", rh)                             // Path to redirect to connect default room
+	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
 	http.HandleFunc("/room", roomHandler)            // Path to connect default room
 	http.HandleFunc("/app/room", appRoomHandler)     // Path to connect default room
 	http.HandleFunc("/rooms-list", roomsListHandler) // Rooms list
-	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
 	http.HandleFunc("/new-room", newRoomHandler)     // Path to create new room -> redirecting to /room/[URL]
 	http.HandleFunc("/ws", WsHandler)                // WebSocket handler
 	fs := http.FileServer(http.Dir("static"))
@@ -150,6 +151,26 @@ func Main() {
 	if err := http.ListenAndServe(config.ADDR, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+}
+
+type App struct {
+	rooms map[string]*room
+}
+
+func NewApp() *App {
+	r := NewRoom()
+
+	a := &App{
+		make(map[string]*room),
+	}
+	a.setRoom(r)
+	return a
+}
+
+func (a *App) setRoom(r *room) {
+	log.Info("New room " + r.Url)
+
+	a.rooms[r.Url] = r
 }
 
 func getPlayerName(r *http.Request, playersCount int) string {
@@ -166,7 +187,7 @@ func getPlayerName(r *http.Request, playersCount int) string {
 func getRoomURL(r *http.Request) (string, error) {
 	params, _ := url.ParseQuery(r.URL.RawQuery)
 	if len(params["room"]) > 0 {
-		if _, ok := activeRooms[params["room"][0]]; ok { // looking for room by request param
+		if _, ok := app.rooms[params["room"][0]]; ok { // looking for room by request param
 			//room found
 			return params["room"][0], nil
 		}

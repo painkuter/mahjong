@@ -25,15 +25,14 @@ type room struct {
 	timer chan struct{}
 	// game chat message
 	message chan string
-	// stop chanel
+	// stop channel
 	stop chan int
 
 	lock sync.RWMutex
 }
 
 func NewRoom() *room {
-	url := generateUrl()
-	wall := generateWall()
+	wall := generateWall() // TODO create type wall
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
 	east := randomEast()
@@ -57,14 +56,13 @@ func NewRoom() *room {
 	statement.Wall = wall
 
 	r := &room{
-		Url:       url,
+		Url:       generateUrl(),
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
 		message:   make(chan string),
 		statement: statement,
 	}
-	log.Info("New room " + url)
-	activeRooms[r.Url] = r
+	app.setRoom(r)
 	Room = r
 	return r
 }
@@ -78,7 +76,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 	// add locks to room
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	log.Infof("New websocket %p\n", ws)
+	log.Infof("New websocket %p\n", ws.LocalAddr())
 	if len(r.players) < 4 {
 		p := playerConn{
 			name:   name,
@@ -192,6 +190,7 @@ func randomizeWall(wall []string) []string {
 	return wall
 }
 
+// generateWall последовательно создает тайлы без перемешивания
 func generateWall() []string {
 	var wall []string
 	for i := 1; i <= 4; i++ { // loop to multiply each tile by 4

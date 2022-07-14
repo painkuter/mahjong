@@ -1,5 +1,12 @@
 # Mahjong
 
+[Diagram](https://miro.com/app/board/uXjVOmsljBo=/?share_link_id=782896531376)
+
+#### Run:
+* mahjong.go - основное приложение 
+* single.go - участвует 1 человек и 3 бота с подготовленных заранее раскладом
+  * можно подключиться через UI, а можно с помощью отдельного клиента просто отправлять сообщения
+* e2e.go - приложение само тестируется
 #### Installation
     docker-compose up
     go mod tidy
@@ -8,7 +15,7 @@
     go run main.go
     
 #### Links
-    0.0.0.0/room
+    **0.0.0.0/room**
     /room/[URL]
     /new-room
     /rooms-list    
@@ -17,6 +24,8 @@
     game
     
 #### Testing
+запуск для одного игрока **cmd/single**
+
     go test ./...
     
 #### Statement
