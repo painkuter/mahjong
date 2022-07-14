@@ -104,7 +104,7 @@ func (p *playerConn) wsMessage(s string, b interface{}) {
 		log.Error(err)
 	}
 	log.Infof("Sending message %s:%s to %d\n", s, text, p.number)
-	err = p.ws.WriteMessage(websocket.TextMessage, text)
+	err = p.ws.WriteMessage(websocket.TextMessage, text) // TODO process error - disconnect player
 	apperr.Check(err)
 	p.lock.Unlock()
 	//log.Printf("Unlock on %p\n", p)

@@ -131,8 +131,7 @@ func LiveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Main() {
-	app = NewApp()
-	_ = app
+	NewApp()
 	rh := http.RedirectHandler("/room", 301)
 	http.Handle("/", rh)                             // Path to redirect to connect default room
 	http.HandleFunc("/room/", roomHandler)           // Path to connect existed room
@@ -147,7 +146,7 @@ func Main() {
 	http.HandleFunc("/view/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
-	log.Infof("Handlers initialized. Serve listening on: %s", config.ADDR)
+	log.Infof("Handlers initialized. Server listening on:  http://%s", config.ADDR)
 	if err := http.ListenAndServe(config.ADDR, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
@@ -158,13 +157,13 @@ type App struct {
 }
 
 func NewApp() *App {
-	r := NewRoom()
 
-	a := &App{
+	app = &App{
 		make(map[string]*room),
 	}
-	a.setRoom(r)
-	return a
+	r := NewRoom()
+	app.setRoom(r)
+	return app
 }
 
 func (a *App) setRoom(r *room) {
