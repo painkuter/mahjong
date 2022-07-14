@@ -3,14 +3,17 @@ package app
 import (
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 
-	"github.com/google/logger"
 	"github.com/gorilla/websocket"
+
+	"mahjong/app/common/log"
+	"mahjong/app/ds"
 )
 
 type room struct {
-	url string
+	Url string
 
 	players []playerConn
 	//players map[int]playerConn
@@ -22,29 +25,30 @@ type room struct {
 	timer chan struct{}
 	// game chat message
 	message chan string
-	// stop chanel
+	// stop channel
 	stop chan int
+
+	lock sync.RWMutex
 }
 
-func newRoom() *room {
-	url := generateUrl()
-	wall := generateWall()
+func NewRoom() *room {
+	wall := generateWall() // TODO create type wall
 	wall = randomizeWall(wall)
 	wall, reserve := generateReserve(wall)
 	east := randomEast()
-
 	statement := &statement{
-		Players: make(map[int]*playerStatement, 4),
+		Players: make(map[int]*PlayerStatement, 4),
 		Reserve: reserve,
 		East:    east,
-		Wind:    1,    //East = 1
-		Step:    east, //starting from east
+		Wind:    1, // East = 1
+		//Step:    east, // starting from east = 1
+		Step: 0,
 	}
 	// Fill players statements
 	for i := 1; i <= 4; i++ {
-		var h hand
-		wall, h = generateHand(wall)
-		pStatement := playerStatement{Hand: h}
+		var h ds.Hand
+		wall, h = generateHand(wall) // fixme
+		pStatement := PlayerStatement{Hand: h}
 		statement.Players[i] = &pStatement
 		//TODO: add wind
 	}
@@ -52,30 +56,45 @@ func newRoom() *room {
 	statement.Wall = wall
 
 	r := &room{
-		url:       url,
+		Url:       generateUrl(),
 		updateAll: make(chan struct{}),
 		stop:      make(chan int),
 		message:   make(chan string),
 		statement: statement,
 	}
-	logger.Info("New room " + url)
-	activeRooms[r.url] = r
+	app.setRoom(r)
+	Room = r
 	return r
+}
+
+func (r *room) Statement() *statement {
+	return r.statement
 }
 
 // AddPlayer adds new playerConn to the room
 func (r *room) AddPlayer(name string, ws *websocket.Conn) {
+	// add locks to room
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	log.Infof("New websocket %p\n", ws.LocalAddr())
 	if len(r.players) < 4 {
-		p := playerConn{name, len(r.players) + 1, ws, r}
+		p := playerConn{
+			name:   name,
+			number: len(r.players) + 1,
+			lock:   sync.Mutex{},
+			ws:     ws,
+			room:   r,
+		}
 		r.players = append(r.players, p)
-		//p.wsMessage("s","test")
+		r.statement.Players[len(r.players)].Name = name
+
+		var players []string
+		for _, p_ := range r.players { // kill me for this naming
+			players = append(players, p_.name)
+		}
 
 		// push player to players list:
 		for _, p_ := range r.players {
-			var players []string
-			for _, p__ := range r.players { // kill me for this naming
-				players = append(players, p__.name)
-			}
 			p_.wsMessage(playersType, players)
 		}
 
@@ -83,31 +102,32 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		if len(r.players) == 4 {
 			go r.run()
 			//TODO: check rooms list
-			Room = newRoom()
+			//Room = NewRoom() todo uncomment
 		}
 	} else {
-		logger.Fatal("Players count already equals four")
+		log.Fatal("Players count already equals four")
 		//TODO: return some error
 	}
 }
 
 func (r *room) run() {
 	// creating receivers for all players
-	for _, p := range r.players {
-		p_ := p
-		go p_.receiver()
+	for i := range r.players {
+		go r.players[i].receiver()
 	}
 
 	// start the game
-	logger.Info("Starting the game")
+	log.Info("Starting the game")
 	for _, p := range r.players {
 		//TODO: check the players
 		p.start()
 	}
 
 	// first turn
-	r.statement.getFromWall()
-	r.updateAllPlayers()
+	r.sendStartStatement()
+	//room.statement.getFromWall()
+	//room.updateAllPlayers()
+	r.statement.nextTurn()
 
 	// waiting for some changes
 	for {
@@ -117,7 +137,7 @@ func (r *room) run() {
 		case <-r.updateAll:
 			r.updateAllPlayers()
 		case pNumber := <-r.stop:
-			logger.Infof("Player #%v stopped the game", pNumber)
+			log.Infof("Player #%v stopped the game", pNumber)
 			r.stopAllPlayers(pNumber)
 		case pMessage := <-r.message:
 			r.sendMessageToAllPlayers(pMessage)
@@ -129,6 +149,21 @@ func (r *room) run() {
 func (r *room) updateAllPlayers() {
 	for i, p := range r.players {
 		p.sendStatement(r.statement.statementByPlayerNumber(i + 1))
+	}
+}
+
+func (r *room) sendStartStatement() {
+	for i, p := range r.players {
+		p.sendStatement(r.statement.statementByPlayerNumber(i + 1))
+	}
+}
+
+func (r *room) sendAction(action *gameAction) {
+	if action == nil { // error actions
+		return
+	}
+	for i, p := range r.players {
+		p.sendAction(r.statement.actionByPlayer(i+1, action))
 	}
 }
 
@@ -155,6 +190,7 @@ func randomizeWall(wall []string) []string {
 	return wall
 }
 
+// generateWall последовательно создает тайлы без перемешивания
 func generateWall() []string {
 	var wall []string
 	for i := 1; i <= 4; i++ { // loop to multiply each tile by 4
@@ -182,10 +218,10 @@ func generateReserve(w []string) (wall, reserve []string) {
 	return w[reserveSize:], w[:reserveSize]
 }
 
-func generateHand(w []string) (wall, h hand) {
-	h = make(hand,handSize)
+func generateHand(w []string) (wall, h ds.Hand) {
+	h = make(ds.Hand, handSize)
 	copy(h, w[:handSize])
-	h.sortHand()
+	h.SortHand()
 	return w[handSize:], h
 }
 
@@ -197,7 +233,7 @@ func randomEast() int {
 func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 	// filter statement for selected playerConn (remove foreign hands, the wall and the reserve)
 	privateStatement := &statement{
-		Players: make(map[int]*playerStatement, 4),
+		Players: make(map[int]*PlayerStatement, 4),
 		Step:    s.Step,
 		Wind:    s.Wind,
 		East:    s.East,
@@ -207,21 +243,45 @@ func (s statement) statementByPlayerNumber(playerNumber int) *statement {
 		if j == playerNumber {
 			privateStatement.Players[100] = player
 		} else {
-			//privateStatement.Players[j] = playerStatement{
-			//	Open:    player.Open,
-			//	Discard: player.Discard,
-			//}
-			privateStatement.Players[j] = player
+			privateStatement.Players[j] = &PlayerStatement{
+				Open:    player.Open,
+				Discard: player.Discard,
+				Name:    player.Name, // TODO add name
+			}
+			//privateStatement.Players[j] = player
 		}
 	}
 	return privateStatement
 }
 
 func generateUrl() string {
+	if true {
+		return "AAA"
+	}
 	var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
-	url := make([]byte, urlLength)
+	url := make([]byte, UrlLength)
 	for i := range url {
-		url[i] = charset[rnd.Intn(len(charset))]
+		url[i] = Charset[rnd.Intn(len(Charset))]
 	}
 	return string(url)
+}
+
+func (s statement) actionByPlayer(player int, action *gameAction) gameAction {
+	player = action.Player
+	switch action.Action {
+	case skipCommand: // fixme
+		return gameAction{
+			Player: player,
+			Action: skipCommand,
+		}
+	case announceCommand:
+		action.Player = player
+	case discardCommand:
+		action.Player = player
+	case readyHandCommand:
+		action.Player = player
+	case getTileCommand:
+		action.Player = player
+	}
+	return *action
 }

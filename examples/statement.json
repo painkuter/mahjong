@@ -3,6 +3,7 @@
   "body": {
     "players": {
       "1": {
+        "name":"PlayerName",
         "hand": null,
         "discard": null,
         "open": null,

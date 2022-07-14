@@ -1,23 +1,25 @@
 package app
 
 import (
-	"github.com/google/logger"
 	ms "github.com/mitchellh/mapstructure"
+
+	"mahjong/app/common/log"
 )
 
 //TODO: process game here
 // processStatement processes players commands
-func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) {
-	var c playerCommand
-	err := ms.Decode(command, &c)
+func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *gameAction {
+	log.Infof("Processing command %v from player #%d", command, playerNumber)
+
+	var comm gameAction
+	err := ms.Decode(command, &comm)
 	if err != nil {
-		logger.Warning(err)
-		return
+		log.Info(err)
+		return nil
 	}
+	comm.Player = playerNumber
 
-	logger.Infof("Processing command %v", command)
-
-	switch c.Status {
+	switch comm.Action {
 	case skipCommand:
 		// skip timer after 4 skips
 		s.Pass[playerNumber] = true
@@ -26,78 +28,91 @@ func (s *statement) processStatement(playerNumber int, command interface{}, time
 			timer <- struct{}{}
 		}
 	case announceCommand:
-		if len(s.Players[s.prevTurn()].Discard) == 0 {
-			logger.Warning("Empty discard")
-			return
-		}
-		lastTile := s.Players[s.prevTurn()].Discard[:1][0]
+		s.lock.Lock()
+		defer s.lock.Unlock()
+
+		//if len(s.Players[s.prevTurn()].Discard) == 0 {
+		//	log.Info("Empty discard")
+		//	return nil
+		//}
+		lastTile := s.lastTile()
 		//remove last tile from discard
-		s.Players[s.prevTurn()].Discard.cutTile(lastTile)
+		s.Players[s.prevTurn()].GetDiscard().CutTile(lastTile)
 
 		//append last tile to the hand
 		h := s.Players[playerNumber].Hand
-		c.Tiles = append(c.Tiles, lastTile)
-		ok := false
-		switch c.Meld {
-		case chowType:
-			if playerNumber != (s.prevTurn()%4)+1 {
+		/*		if lastTile != "" {
+				comm.Value = append(comm.Value, lastTile)
+			}*/
+		var ok bool
+		switch comm.Meld {
+		case ChowType:
+			if playerNumber != s.Step {
+				//if playerNumber != (s.prevTurn()%4)+1 {
 				// TODO: return error
-				logger.Warning("Wrong turn for chow")
-				return
+				log.Info("Wrong turn for chow")
+				return nil
 			}
-			ok = h.checkChow(c.Tiles)
-		case pongType:
-			ok = h.checkPong(c.Tiles)
-		case kongType:
-			ok = h.checkKong(c.Tiles)
-		case mahjongType:
+			ok = h.CheckChow(comm.Value)
+		case PongType:
+			ok = h.CheckPong(comm.Value)
+		case KongType:
+			ok = h.CheckKong(comm.Value)
+		case MahjongType:
 			if !s.Players[playerNumber].IsReady {
 				// TODO: return error: hand isn't ready
-				return
+				return nil
 			}
 			//TODO: finish game, sand full statement
-			logger.Infoln("MAHJONG!!!")
+			log.Infof("MAHJONG!!!")
+		default:
+			log.Warning("Wrong command")
 		}
 		if !ok {
-			return
+			return nil
 		}
 
-		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, c.Tiles)
-		for _, tile := range c.Tiles {
-			s.Players[playerNumber].Hand.cutTile(tile)
+		s.Players[playerNumber].Open = append(s.Players[playerNumber].Open, comm.Value)
+		for _, tile := range comm.Value {
+			s.Players[playerNumber].Hand.CutTile(tile)
 		}
-		s.Step = playerNumber
+		s.Step = playerNumber // в случае анонса ход переходит к игроку, который забрал тайл
 	case discardCommand:
+		s.lock.Lock()
+		defer s.lock.Unlock()
+
+		log.Infof("Player #%d step", s.Step)
 		if s.Step != playerNumber {
-			logger.Warning("Wrong player number")
-			return
+			log.Info("Wrong player number")
+			return nil
 		}
-		if len(c.Tiles) > 1 {
-			logger.Warning("Wrong tiles number in the command")
-			return
+		if len(comm.Value) > 1 {
+			log.Info("Wrong tiles number in the command")
+			return nil
 		}
 		p := s.Players[playerNumber]
 		//TODO: remove this:
 		if p.CurrentTile == "" {
-			logger.Warning("Empty current tile")
-			return
+			log.Info("Empty current tile")
+			return nil
 		}
 		//
 		p.Hand = append(p.Hand, p.CurrentTile)
 		p.CurrentTile = ""
-		p.Hand.cutTile(c.Tiles[0])
+		p.Hand.CutTile(comm.Value[0])
 
-		p.Discard = append(p.Discard, c.Tiles[0])
+		p.Discard = append(p.Discard, comm.Value[0])
 		// timer for announce
 		s.nextTurn()
 	case readyHandCommand:
 		s.Players[playerNumber].IsReady = true
 		//TODO: announce to all players
-		logger.Infoln("Ready hand!")
+		log.Infof("Ready hand!")
 	default:
-		logger.Error("Wrong client command")
+		log.Info("Wrong client command: " + comm.Action)
 		// TODO: finish with player's error
 	}
+	return &comm
 }
 
 func (s *statement) getFromWall() {
@@ -106,8 +121,9 @@ func (s *statement) getFromWall() {
 	s.Wall = s.Wall[1:]
 }
 
+/*
 // removes tile from the hand
-func (h *hand) cutTile(tile string) {
+func (h *ds.Hand) cutTile(tile string) {
 	for i, elem := range *h {
 		if tile == elem {
 			*h = append((*h)[:i], (*h)[i+1:]...) //we use pointer to slice to avoid problems with capacity
@@ -115,8 +131,8 @@ func (h *hand) cutTile(tile string) {
 		}
 	}
 	// TODO: handle error
-	logger.Warning("Tile not found")
-}
+	log.Info("Tile not found")
+}*/
 
 // move turn to the next player
 func (s *statement) nextTurn() {
@@ -126,12 +142,17 @@ func (s *statement) nextTurn() {
 
 // returns last player's number
 func (s *statement) prevTurn() int {
-	return (s.Step+4)%4 - 1
+	return (s.Step+2)%4 + 1
 }
 
 // returns last tile name
 func (s *statement) lastTile() string {
-	return s.Players[s.prevTurn()].Discard[:1][0]
+	pt := s.prevTurn()
+	discard := s.Players[pt].Discard // только боты могут объявлять на первом ходу
+	if discard != nil {
+		return discard[:1][0]
+	}
+	return ""
 }
 
 func (p pass) checkSkip() bool {

@@ -1,0 +1,2 @@
+{"status":"message","body":"message text"} // toS
+{"status":"message","body":"message text", "player":66} // toC показывает в поле player, какой игрок прислал сообщение

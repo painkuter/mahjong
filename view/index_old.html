@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="cache-control" content="no-cache"/>
+    <meta content="no-cache" http-equiv="cache-control"/>
     <title>Index</title>
     <style>
         #your_turn {
@@ -13,12 +13,12 @@
     <script>
         $(document).ready(function () {
             //TODO: get room URL
-            var conn;
-            var command = $("#command");
-            var log = $("#log");
+            let conn;
+            const command = $("#command");
+            const log = $("#log");
             //var name = window.prompt("Your name");
-            var name = "pName";
-            var host = "{{.Host}}";
+            const name = "pName";
+            const host = "{{.Host}}";
             if (window["WebSocket"]) {//supported device list?
                 roomURL = window.location.href.substring(window.location.href.indexOf(host) + host.length + 5); //rewrite it
                 console.log(roomURL);
@@ -101,12 +101,12 @@
             });
             $("#send_command").click(function () {
                 var turn = {
-                    status: "discard",
+                    action: "discard",
                     meld: "",
-                    tiles: [command.val()]
+                    value: [command.val()]
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -116,12 +116,12 @@
             // just for tests
             $("#go").click(function () {
                 var turn = {
-                    status: "skip",
+                    action: "skip",
                     meld: "",
-                    tiles: []
+                    value: []
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -134,12 +134,12 @@
                     tiles.push($(this).next().text());
                 });
                 var turn = {
-                    status: "announce",
+                    action: "announce",
                     meld: "chow",
-                    tiles: tiles
+                    value: tiles
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -152,12 +152,12 @@
                     tiles.push($(this).next().text());
                 });
                 var turn = {
-                    status: "announce",
+                    action: "announce",
                     meld: "pong",
-                    tiles: tiles
+                    value: tiles
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -170,12 +170,12 @@
                     tiles.push($(this).next().text());
                 });
                 var turn = {
-                    status: "announce",
+                    action: "announce",
                     meld: "kong",
-                    tiles: tiles
+                    value: tiles
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 console.log(JSON.stringify(wsMessage));
@@ -184,12 +184,12 @@
             });
             $("body").on("click", ".tile", function () {
                 var turn = {
-                    status: "discard",
+                    action: "discard",
                     meld: "",
-                    tiles: [$(this).text()]
+                    value: [$(this).text()]
                 };
                 var wsMessage = {
-                    status: "game",
+                    status: "action",
                     body: turn
                 };
                 $("#current_tile").text("");
@@ -212,17 +212,17 @@
 <p>Room name: <a href="/room/{{.RoomName}}">{{.RoomName}}</a></p>
 <p>Players number: {{.Players}}</p>
 
-<input type="text" id="command" name="command" value="">
+<input id="command" name="command" type="text" value="">
 <button id="send_command">Send</button>
 
 <br/>
 
-<input type="text" id="message" name="message" value="">
+<input id="message" name="message" type="text" value="">
 <button id="send_message">Send message</button>
 
 <br>
 
-<textarea id="log" rows="10" cols="50"></textarea>
+<textarea cols="50" id="log" rows="10"></textarea>
 <h3>Players List:</h3>
 <ul id="players_list">
 </ul>
@@ -236,7 +236,7 @@
 <br>
 <h1 id="your_turn">YOUR TURN</h1>
 <h3>Current tile:</h3><br>
-<button id="current_tile" class="tile"></button>
+<button class="tile" id="current_tile"></button>
 
 <br>
 

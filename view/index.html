@@ -1,199 +1,25 @@
 <!doctype html>
-<html>
+<html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <title>Hello World</title>
+    <meta charset="utf-8">
+    <title>Mahjong</title>
 </head>
-  <script src="../static/pixi/pixi.min.js"></script>
-  <script type="text/javascript" src="../static/data.json"></script>
+<script src="../static/pixi/pixi.min.js"></script>
+<script src="../static/game/room.js" defer></script>
+<script src="../static/game/menu.js" defer></script>
+<script src="../static/game/preparation.js" defer></script>
+<script src="../static/game/send_message.js" defer></script>
+<script type="text/javascript" src="../static/tiles.json"></script>
+<!--debug code. remove before release-->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<!---->
 <body>
 <script type="text/javascript">
-    let gameData = {
-    "status":"game",
-    "body":{
-      "players":{
-        "0":{
-          "hand":null,
-          "discard":[],
-          "open":null,
-          "current_tile":"",
-          "wind":1
-        },
-        "1":{
-          "hand":null,
-          "discard":[],
-          "open":null,
-          "current_tile":"",
-          "wind":2
-        },
-        "2":{
-          "hand":null,
-          "discard":[],
-          "open":null,
-          "current_tile":"",
-          "wind":3
-        },
-        "100":{
-          "hand":[
-            "1_9_2",
-            "3_3_3",
-            "3_1_3",
-            "3_4_1",
-            "4_2_3",
-            "3_9_2",
-            "3_9_4",
-            "1_1_2",
-            "1_8_4",
-            "4_4_1",
-            "2_8_1",
-            "2_8_4",
-            "1_9_1"
-          ],
-          "discard":[
-            "1_9_3",
-            "3_3_2",
-            "3_1_2",
-            "3_4_4",
-            "3_2_2",
-            "1_2_2",
-            "3_3_1",
-            "2_6_1"
-          ],
-          "open":null,
-          "current_tile":"",
-          "wind":4
-        }
-      },
-      "wall":null,
-      "wind":1,
-      "step":1,
-      "reserve":null
-      }
-    };
-    let type = "WebGL";
-    if(!PIXI.utils.isWebGLSupported()){
-      type = "canvas"
-    }
-
-    let tileStack = {};
-    let myStack = [];
-
-    PIXI.utils.sayHello(type);
-    let app = new PIXI.Application({width: 1200, height: 900});
-    app.renderer.backgroundColor = 0xffffff;
-    //Add the canvas that Pixi automatically created for you to the HTML document
-    document.body.appendChild(app.view);
-    PIXI.loader
-            .add("mahjongTiles", "/static/images/tiles-mahjong.jpg")
-            .load(setup);
-
-    function createTile(texture, rect, name) {
-
-      let sprite = new PIXI.Sprite(new PIXI.Texture(texture, rect, name));
-      sprite.width = 50;
-      sprite.height = 70;
-      let tile = {
-        "name" : name,
-        "sprite" :sprite
-      };
-      return tile;
-    }
-
-    function setup() {
-      load();
-
-      let me = getMe();
-      app.stage.addChild(me);
-      //Render the stage
-      app.renderer.render(app.stage);
-    }
-
-    function getMe() {
-      let me = new PIXI.Container();
-      for (var i in gameData.body.players["100"].hand){
-        var tile = tileStack[gameData.body.players["100"].hand[i]];
-        tile.sprite.interactive = true;
-        tile.sprite.buttonMode = true;
-        tile.sprite.on("pointerdown", onSelect);
-        myStack.push(tile);
-      }
-      myStack.sort(handSort);
-
-      let discard = getDiscard(gameData.body.players["100"]);
-      me.addChild(discard);
-      for(var i in myStack) {
-        myStack[i].sprite.x = (myStack[i].sprite.width+2)*i;
-        myStack[i].sprite.y = discard.height+100;
-        me.addChild(myStack[i].sprite);
-      }
-
-      discard.position.x = me.width/2 - discard.width/2;
-
-      me.position.x = app.renderer.view.width/2 - me.width/2;
-      me.position.y = app.renderer.view.height - (me.height + 10);
-
-      return me;
-    }
-
-    function getDiscard(player) {
-      let discard = new PIXI.Container();
-      var col = 0;
-      var row = 0;
-      for (var i in player.discard){
-        var tile = tileStack[player.discard[i]];
-
-        tile.sprite.width = 40;
-        tile.sprite.height = 56;
-        tile.sprite.x = (tile.sprite.width+2)*col;
-        tile.sprite.y = (tile.sprite.height+2)*row;
-        discard.addChild(tile.sprite);
-
-        if(i%5 == 0 && i>0){
-          col = 0;
-          row++;
-        }else{
-          col++;
-        }
-      }
-
-      return discard;
-    }
-
-    function onSelect() {
-      if(!this.isSelected) {
-        for(var index in myStack) {
-          var tile = myStack[index];
-          if(tile.sprite.isSelected){
-            tile.sprite.y += 15;
-            tile.sprite.isSelected = false;
-            break;
-          }
-        }
-        this.isSelected = true;
-        this.y -= 15;
-      }
-    }
-
-    function load() {
-      for (var index in tiles_data.mahjong_tiles) {
-        var value = tiles_data.mahjong_tiles[index];
-        for (var i = 1; i <= 4; i++) {
-          tileStack[index+"_"+i] = createTile(PIXI.loader.resources.mahjongTiles.texture, new PIXI.Rectangle(value.x, value.y, value.width, value.height), index+"_"+i);
-        }
-      }
-    }
-
-    function handSort(a, b) {
-      console.log(a.name);
-      console.log(b.name);
-      if(a.name > b.name){
-        return 1;
-      }
-      if(a.name < b.name){
-        return -1;
-      }
-    }
-
-  </script>
+    const host = "{{.Host}}";
+</script>
+<div id="game"></div>
+<label for="log"></label><textarea cols="150" id="log" rows="10"></textarea>
 </body>
 </html>

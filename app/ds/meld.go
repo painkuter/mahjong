@@ -1,10 +1,12 @@
-package app
+package ds
 
 import (
 	"strconv"
+
+	"mahjong/app/apperr"
 )
 
-func (h hand) checkPong(pong []string) bool {
+func (h Hand) CheckPong(pong []string) bool {
 	if !(len(pong) == 3) {
 		return false
 	}
@@ -20,7 +22,7 @@ func (h hand) checkPong(pong []string) bool {
 	return count == 3
 }
 
-func (h hand) checkKong(kong []string) bool {
+func (h Hand) CheckKong(kong []string) bool {
 	if !(len(kong) == 4) {
 		return false
 	}
@@ -36,7 +38,7 @@ func (h hand) checkKong(kong []string) bool {
 	return count == 4
 }
 
-func (h hand) checkChow(chow []string) bool {
+func (h Hand) CheckChow(chow []string) bool {
 	if !(len(chow) == 3) {
 		return false
 	}
@@ -45,11 +47,11 @@ func (h hand) checkChow(chow []string) bool {
 	}
 
 	a, err := strconv.ParseInt(chow[0][2:3], 10, 64)
-	check(err)
+	apperr.Check(err)
 	b, err := strconv.ParseInt(chow[1][2:3], 10, 64)
-	check(err)
+	apperr.Check(err)
 	c, err := strconv.ParseInt(chow[2][2:3], 10, 64)
-	check(err)
+	apperr.Check(err)
 
 	if a > b {
 		a, b = b, a
@@ -76,7 +78,7 @@ func (h hand) checkChow(chow []string) bool {
 	return count == 3
 }
 
-func (h hand) checkMahjong(mahjong [][]string) bool {
+func (h Hand) CheckMahjong(mahjong [][]string) bool {
 
 	return true
 }
