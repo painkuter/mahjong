@@ -21,55 +21,50 @@ var (
 	app  *App
 )
 
-func roomHandler(w http.ResponseWriter, r *http.Request) {
+func parseRoomName(w http.ResponseWriter, r *http.Request) string {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
 	apperr.Check(err)
-	if roomUrl == "room" {
+	if roomUrl == config.DefaultRoomURL {
 		roomUrl = Room.Url
 	} else {
 		if len(roomUrl) != UrlLength {
 			log.Info("Wrong room-Url")
 			http.Error(w, "Room not found", 404)
-			return
+			return ""
 		}
 	}
+	return roomUrl
+}
 
+const roomPage = "view/index.html"
+const roomPageOld = "view/index_old.html"
+
+// roomHandler подключает нового игрока к комнате
+func roomHandler(w http.ResponseWriter, r *http.Request) {
+	roomUrl := parseRoomName(w, r)
 	playerName, err := parth.SegmentToString(r.URL.Path, 0)
 	apperr.Check(err)
 	log.Infof(playerName)
 
-	//var homeTempl = template.Must(template.ParseFiles("view/index_old.html"))
-	var homeTempl = template.Must(template.ParseFiles("view/index.html"))
+	//var homeTempl = template.Must(template.ParseFiles(roomPageOld))
+	var homeTempl = template.Must(template.ParseFiles(roomPage))
 	data := RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
-	homeTempl.Execute(w, data)
+	err = homeTempl.Execute(w, data)
+	apperr.Check(err)
 }
 
 func appRoomHandler(w http.ResponseWriter, r *http.Request) {
-	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
-	apperr.Check(err)
-	if roomUrl == "room" {
-		roomUrl = Room.Url
-	} else {
-		if len(roomUrl) != UrlLength {
-			log.Info("Wrong room-Url")
-			http.Error(w, "Room not found", 404)
-			return
-		}
-	}
+	roomUrl := parseRoomName(w, r)
 	data := RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	response, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
-	w.Write(response)
+	apperr.Check(err)
+	_, err = w.Write(response)
+	apperr.Check(err)
 	w.Header().Set("Content-Type", "application/json")
 }
 
 func roomsListHandler(w http.ResponseWriter, r *http.Request) {
-	var rooms []string
-	for _, room := range app.rooms {
-		rooms = append(rooms, room.Url)
-	}
+	rooms := app.roomList()
 	var roomsTempl = template.Must(template.ParseFiles("view/rooms.html"))
 	data := struct {
 		Rooms []string
@@ -77,6 +72,7 @@ func roomsListHandler(w http.ResponseWriter, r *http.Request) {
 	roomsTempl.Execute(w, data)
 }
 
+// newRoomHandler редиректит в новую комнату
 func newRoomHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/room/"+NewRoom().Url, 302)
 }
@@ -172,6 +168,15 @@ func (a *App) setRoom(r *room) {
 	a.rooms[r.Url] = r
 }
 
+func (a *App) roomList() []string {
+	rooms := make([]string, len(a.rooms))
+	for _, room := range app.rooms {
+		rooms = append(rooms, room.Url)
+	}
+	return rooms
+}
+
+// getPlayerName возвращает установленное игроком имя или возвращает заглушку для анонима с учетом общего числа игроков
 func getPlayerName(r *http.Request, playersCount int) string {
 	params, err := url.ParseQuery(r.URL.RawQuery)
 	if err != nil {
@@ -185,10 +190,10 @@ func getPlayerName(r *http.Request, playersCount int) string {
 
 func getRoomURL(r *http.Request) (string, error) {
 	params, _ := url.ParseQuery(r.URL.RawQuery)
-	if len(params["room"]) > 0 {
-		if _, ok := app.rooms[params["room"][0]]; ok { // looking for room by request param
+	if len(params[config.DefaultRoomURL]) > 0 {
+		if _, ok := app.rooms[params[config.DefaultRoomURL][0]]; ok { // looking for room by request param
 			//room found
-			return params["room"][0], nil
+			return params[config.DefaultRoomURL][0], nil
 		}
 		return Room.Url, nil
 	}
