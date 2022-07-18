@@ -8,10 +8,10 @@ import (
 
 //TODO: process game here
 // processStatement processes players commands
-func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *gameAction {
+func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *GameAction {
 	log.Infof("Processing command %v from player #%d", command, playerNumber)
 
-	var comm gameAction
+	var comm GameAction
 	err := ms.Decode(command, &comm)
 	if err != nil {
 		log.Info(err)

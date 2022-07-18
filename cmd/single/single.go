@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"os"
 	"strconv"
@@ -14,9 +14,12 @@ import (
 	"mahjong/app/common"
 	"mahjong/app/common/log"
 	"mahjong/app/config"
+	"mahjong/app/ds"
 )
 
-func die(w http.ResponseWriter, r *http.Request) {
+// die нужен для удаленного перезапуска приложения
+func die(w http.ResponseWriter, _ *http.Request) { // TODO fix me
+	w.Write([]byte("restarting"))
 	os.Exit(1)
 }
 
@@ -85,7 +88,7 @@ func (c testCon) makeTurn(step int, statement *app.PlayerStatement) {
 	case 1, 2, 3:
 		kong := statement.Hand.FindKong()
 		if kong != nil {
-			turn := fmt.Sprintf(`{"status":"action","body":{"action":"announce", "value":%s, "meld":"kong"}}`, kong.Print())
+			turn := c.printActionTurn("announce", kong)
 			err := c.conn[step-1].WriteMessage(websocket.TextMessage, []byte(turn))
 			apperr.Check(err)
 			return
@@ -93,7 +96,7 @@ func (c testCon) makeTurn(step int, statement *app.PlayerStatement) {
 
 		pong := statement.Hand.FindKong()
 		if pong != nil {
-			turn := fmt.Sprintf(`{"status":"action","body":{"action":"announce", "value":%s, "meld":"kong"}}`, pong.Print())
+			turn := c.printActionTurn("announce", pong)
 			err := c.conn[step-1].WriteMessage(websocket.TextMessage, []byte(turn))
 			apperr.Check(err)
 			return
@@ -101,16 +104,31 @@ func (c testCon) makeTurn(step int, statement *app.PlayerStatement) {
 
 		chow := statement.Hand.FindChow() // TODO add WithTile()
 		if chow != nil {
-			turn := fmt.Sprintf(`{"status":"action","body":{"action":"announce", "value":%s, "meld":"chow"}}`, chow.Print())
+			turn := c.printActionTurn("announce", chow)
 			err := c.conn[step-1].WriteMessage(websocket.TextMessage, []byte(turn))
 			apperr.Check(err)
 			return
 		}
-
-		turn := fmt.Sprintf(`{"status":"action","body":{"action":"discard", "value":["` + statement.Hand[0] + `"]}}`)
+		turn := c.printActionTurn("discard", statement.Hand)
 		err := c.conn[step-1].WriteMessage(websocket.TextMessage, []byte(turn))
 		apperr.Check(err)
 
 		// Поиск комбинации в руке + последний тайл из дискарда
 	}
+}
+
+func (c testCon) printActionTurn(action string, h ds.Hand) string {
+	act := app.GameAction{
+		Action: action,
+		Value:  h,
+	}
+
+	result := app.WsMessage{
+		Status: "action",
+		Body:   act,
+	}
+
+	buf, err := json.Marshal(result)
+	apperr.Check(err)
+	return string(buf)
 }

@@ -23,7 +23,7 @@ type statement struct {
 	StepCount int                      `json:"step_count"` // порядковый номер хода
 	Reserve   ds.Hand                  `json:"reserve,omitempty"`
 	Pass      pass                     `json:"-"`
-	lock      sync.RWMutex             `json:"-"`
+	lock      sync.RWMutex
 }
 
 type PlayerStatement struct {
@@ -44,7 +44,7 @@ func (ps *PlayerStatement) GetDiscard() *ds.Hand {
 	return &ps.Discard
 }
 
-type gameAction struct {
+type GameAction struct {
 	Player int     `json:"player"`
 	Action string  `json:"action"` // skip / discard / announce
 	Meld   string  `json:"meld"`   // chow / pong / kong
@@ -58,10 +58,3 @@ type RoomResponse struct {
 	RoomName string `json:"room_name"`
 	Players  int    `json:"players"`
 }
-
-/*type gameActionOld struct {
-	Player int      `json:"player"`
-	Action string   `json:"action"`
-	Meld   string   `json:"meld"`
-	Value  []string `json:"value"`
-}*/

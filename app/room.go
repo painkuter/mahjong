@@ -89,7 +89,7 @@ func (r *room) AddPlayer(name string, ws *websocket.Conn) {
 		r.statement.Players[len(r.players)].Name = name
 
 		var players []string
-		for _, p_ := range r.players { // kill me for this naming
+		for _, p_ := range r.players { // kill me for this
 			players = append(players, p_.name)
 		}
 
@@ -158,7 +158,7 @@ func (r *room) sendStartStatement() {
 	}
 }
 
-func (r *room) sendAction(action *gameAction) {
+func (r *room) sendAction(action *GameAction) {
 	if action == nil { // error actions
 		return
 	}
@@ -266,11 +266,11 @@ func generateUrl() string {
 	return string(url)
 }
 
-func (s statement) actionByPlayer(player int, action *gameAction) gameAction {
+func (s statement) actionByPlayer(player int, action *GameAction) GameAction {
 	player = action.Player
 	switch action.Action {
 	case skipCommand: // fixme
-		return gameAction{
+		return GameAction{
 			Player: player,
 			Action: skipCommand,
 		}
