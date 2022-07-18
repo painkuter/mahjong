@@ -13,6 +13,7 @@ import (
 	"mahjong/app/common"
 	"mahjong/app/common/log"
 	"mahjong/app/config"
+	"mahjong/app/ds"
 )
 
 var ws *websocket.Conn
@@ -45,7 +46,7 @@ func main() {
 
 func room(w http.ResponseWriter, r *http.Request) {
 	var homeTempl = template.Must(template.ParseFiles("./view/index.html"))
-	data := app.RoomResponse{Host: r.Host, RoomName: "AAA", Players: 4}
+	data := ds.RoomResponse{Host: r.Host, RoomName: "AAA", Players: 4}
 	err := homeTempl.Execute(w, data)
 	if err != nil {
 		panic(err)

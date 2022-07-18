@@ -24,7 +24,7 @@ func (p *playerConn) sendStatement(s *statement) {
 }
 
 // Send message to game chat
-func (p *playerConn) sendAction(action gameAction) {
+func (p *playerConn) sendAction(action ds.GameAction) {
 	p.wsMessage(actionType, action)
 }
 
@@ -96,10 +96,10 @@ func (p *playerConn) handleMessage(buf ds.WsMessage) {
 	}
 }
 
-func (p *playerConn) wsMessage(s string, b interface{}) {
+func (p *playerConn) wsMessage(s string, body interface{}) {
 	p.lock.Lock()
 	//log.Printf("Lock on %p\n", p)
-	text, err := json.Marshal(WsMessage{Status: s, Body: b})
+	text, err := json.Marshal(ds.WsMessage{Status: s, Body: body})
 	if err != nil {
 		log.Error(err)
 	}
@@ -125,6 +125,6 @@ func (p *playerConn) close() {
 	p.lock.Unlock()
 }
 
-func parseAction(action string) gameAction {
-	return gameAction{}
+func parseAction(action string) ds.GameAction {
+	return ds.GameAction{}
 }

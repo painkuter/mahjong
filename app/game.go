@@ -4,14 +4,15 @@ import (
 	ms "github.com/mitchellh/mapstructure"
 
 	"mahjong/app/common/log"
+	"mahjong/app/ds"
 )
 
 //TODO: process game here
 // processStatement processes players commands
-func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *gameAction {
+func (s *statement) processStatement(playerNumber int, command interface{}, timer chan struct{}) *ds.GameAction {
 	log.Infof("Processing command %v from player #%d", command, playerNumber)
 
-	var comm gameAction
+	var comm ds.GameAction
 	err := ms.Decode(command, &comm)
 	if err != nil {
 		log.Info(err)

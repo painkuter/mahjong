@@ -11,6 +11,7 @@ import (
 	"mahjong/app/apperr"
 	"mahjong/app/common/log"
 	"mahjong/app/config"
+	"mahjong/app/ds"
 
 	"github.com/codemodus/parth"
 	"github.com/gorilla/websocket"
@@ -48,14 +49,14 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 
 	//var homeTempl = template.Must(template.ParseFiles(roomPageOld))
 	var homeTempl = template.Must(template.ParseFiles(roomPage))
-	data := RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	data := ds.RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	err = homeTempl.Execute(w, data)
 	apperr.Check(err)
 }
 
 func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl := parseRoomName(w, r)
-	data := RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	data := ds.RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
 	response, err := json.Marshal(data)
 	apperr.Check(err)
 	_, err = w.Write(response)

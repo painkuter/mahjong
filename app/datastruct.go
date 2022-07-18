@@ -6,13 +6,6 @@ import (
 	"mahjong/app/ds"
 )
 
-type WsMessage struct {
-	Status string      `json:"status"` //
-	Body   interface{} `json:"body"`
-	//type
-	//code
-}
-
 type statement struct {
 	Players   map[int]*PlayerStatement `json:"players"`
 	LastTile  string                   `json:"last_tile,omitempty"`
@@ -23,7 +16,7 @@ type statement struct {
 	StepCount int                      `json:"step_count"` // порядковый номер хода
 	Reserve   ds.Hand                  `json:"reserve,omitempty"`
 	Pass      pass                     `json:"-"`
-	lock      sync.RWMutex             `json:"-"`
+	lock      sync.RWMutex
 }
 
 type PlayerStatement struct {
@@ -44,24 +37,5 @@ func (ps *PlayerStatement) GetDiscard() *ds.Hand {
 	return &ps.Discard
 }
 
-type gameAction struct {
-	Player int     `json:"player"`
-	Action string  `json:"action"` // skip / discard / announce
-	Meld   string  `json:"meld"`   // chow / pong / kong
-	Value  ds.Hand `json:"value"`
-}
-
+// pass - состояние хода каждого игрока по номеру: true = пасанул, false = делает ход, nil = ждем ответа
 type pass map[int]bool
-
-type RoomResponse struct {
-	Host     string `json:"host"` // зачем здесь хост?
-	RoomName string `json:"room_name"`
-	Players  int    `json:"players"`
-}
-
-/*type gameActionOld struct {
-	Player int      `json:"player"`
-	Action string   `json:"action"`
-	Meld   string   `json:"meld"`
-	Value  []string `json:"value"`
-}*/
