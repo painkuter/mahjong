@@ -18,15 +18,15 @@ import (
 )
 
 var (
-	Room *room // active room for new players TODO use mutex for room
-	app  *App
+	Room        *room // active room for new players TODO use mutex for room
+	application *App
 )
 
 func parseRoomName(w http.ResponseWriter, r *http.Request) string {
 	roomUrl, err := parth.SegmentToString(r.URL.Path, -1)
 	apperr.Check(err)
 	if roomUrl == config.DefaultRoomURL {
-		roomUrl = Room.Url
+		return application.ActiveRoomURL()
 	} else {
 		if len(roomUrl) != UrlLength {
 			log.Info("Wrong room-Url")
@@ -49,14 +49,14 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 
 	//var homeTempl = template.Must(template.ParseFiles(roomPageOld))
 	var homeTempl = template.Must(template.ParseFiles(roomPage))
-	data := ds.RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	data := ds.RoomResponse{r.Host, roomUrl, len(application.ActiveRoom().players) + 1}
 	err = homeTempl.Execute(w, data)
 	apperr.Check(err)
 }
 
 func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 	roomUrl := parseRoomName(w, r)
-	data := ds.RoomResponse{r.Host, roomUrl, len(Room.players) + 1}
+	data := ds.RoomResponse{r.Host, roomUrl, len(application.ActiveRoom().players) + 1}
 	response, err := json.Marshal(data)
 	apperr.Check(err)
 	_, err = w.Write(response)
@@ -65,7 +65,7 @@ func appRoomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func roomsListHandler(w http.ResponseWriter, r *http.Request) {
-	rooms := app.roomList()
+	rooms := application.roomList()
 	var roomsTempl = template.Must(template.ParseFiles("view/rooms.html"))
 	data := struct {
 		Rooms []string
@@ -79,7 +79,15 @@ func newRoomHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ActiveRoom(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(Room.Url))
+	w.Write([]byte(application.ActiveRoomURL()))
+}
+
+func (a *App) ActiveRoomURL() string {
+	return a.lastRoomUrl
+}
+
+func (a *App) ActiveRoom() *room {
+	return a.rooms[a.lastRoomUrl]
 }
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,12 +100,12 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Wrong room URL", 400)
 	}
-	playersCount := len(app.rooms[roomURL].players)
+	playersCount := len(application.rooms[roomURL].players)
 
 	playerName := getPlayerName(r, playersCount)
 	log.Infof("Player %s has joined to room %s", playerName, roomURL)
 
-	app.rooms[roomURL].AddPlayer(playerName, ws)
+	application.rooms[roomURL].AddPlayer(playerName, ws)
 }
 
 func NewWSConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
@@ -150,28 +158,36 @@ func Main() {
 }
 
 type App struct {
-	rooms map[string]*room
+	rooms       map[string]*room
+	lastRoomUrl string
 }
 
 func NewApp() *App {
 
-	app = &App{
-		make(map[string]*room),
+	application = &App{
+		rooms: make(map[string]*room),
 	}
 	r := NewRoom()
-	app.setRoom(r)
-	return app
+	application.setRoom(r)
+	return application
+}
+
+func (a *App) Room(url string) *room {
+	return a.rooms[url]
 }
 
 func (a *App) setRoom(r *room) {
 	log.Info("New room " + r.Url)
-
+	if a.rooms == nil {
+		a.rooms = map[string]*room{}
+	}
+	a.lastRoomUrl = r.Url
 	a.rooms[r.Url] = r
 }
 
 func (a *App) roomList() []string {
 	rooms := make([]string, len(a.rooms))
-	for _, room := range app.rooms {
+	for _, room := range application.rooms {
 		rooms = append(rooms, room.Url)
 	}
 	return rooms
@@ -190,16 +206,18 @@ func getPlayerName(r *http.Request, playersCount int) string {
 }
 
 func getRoomURL(r *http.Request) (string, error) {
-	params, _ := url.ParseQuery(r.URL.RawQuery)
+	params, err := url.ParseQuery(r.URL.RawQuery)
+	if err != nil {
+		return "", err
+	}
 	if len(params[config.DefaultRoomURL]) > 0 {
-		if _, ok := app.rooms[params[config.DefaultRoomURL][0]]; ok { // looking for room by request param
+		if _, ok := application.rooms[params[config.DefaultRoomURL][0]]; ok { // looking for room by request param
 			//room found
 			return params[config.DefaultRoomURL][0], nil
 		}
-		return Room.Url, nil
 	}
 	// this way is error
 	log.Error("Error getting room-parameter")
 	// Need to return 400 to client
-	return Room.Url, nil
+	return application.ActiveRoomURL(), nil
 }

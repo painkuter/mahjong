@@ -62,8 +62,7 @@ func NewRoom() *room {
 		message:   make(chan string),
 		statement: statement,
 	}
-	app.setRoom(r)
-	Room = r
+	application.setRoom(r)
 	return r
 }
 

@@ -23,8 +23,10 @@ func die(w http.ResponseWriter, _ *http.Request) { // TODO fix me
 	os.Exit(1)
 }
 
-func toRoom(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/ws?"+app.Room.Url, 302) // fixme
+func newRoomHandler(a *app.App) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/ws?"+a.ActiveRoomURL(), 302) // fixme
+	}
 }
 
 type testCon struct {
@@ -36,11 +38,12 @@ func main() {
 	l := log.InitLogging()
 	defer l.Close()
 
-	newRoom := app.NewRoom()
+	application := app.NewApp()
+	newRoom := application.ActiveRoomURL()
 	go func() {
 		http.HandleFunc("/ws", app.WsHandler)
 		http.HandleFunc("/room", app.ActiveRoom)
-		http.HandleFunc("/to-room", toRoom)
+		http.HandleFunc("/to-room", newRoomHandler(application))
 		http.HandleFunc("/die", die)
 		http.HandleFunc("/live", app.LiveHandler)
 		err := http.ListenAndServe(config.ADDR, nil)
@@ -62,7 +65,7 @@ func main() {
 	for i := 0; i < 3; i++ {
 		messageCh[i] = make(chan string, 10)
 		// Connect to the server
-		url := host + "/ws?room=" + newRoom.Url + "&name=player_" + strconv.Itoa(i)
+		url := host + "/ws?room=" + newRoom + "&name=player_" + strconv.Itoa(i)
 		log.Info(url)
 		ws, _, err := websocket.DefaultDialer.Dial(url, nil)
 		apperr.Check(err)
@@ -78,7 +81,7 @@ func main() {
 	log.Info("Single game ready. Waiting for 4th played connection")
 
 	for {
-		testPlayers.makeTurn(newRoom.Statement().Step, newRoom.Statement().Players[newRoom.Statement().Step])
+		testPlayers.makeTurn(application.Room(newRoom).Statement().Step, application.Room(newRoom).Statement().Players[application.Room(newRoom).Statement().Step])
 		time.Sleep(100 * time.Millisecond)
 	}
 }
